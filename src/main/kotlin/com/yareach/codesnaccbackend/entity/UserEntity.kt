@@ -21,15 +21,19 @@ class UserEntity (
     var password: String,
 
     @Column(name = "nickname")
-    var nickName: String?,
+    var nickName: String? = null,
 
     @Enumerated(EnumType.STRING)
-    var role: UserRole,
+    var role: UserRole = UserRole.USER,
 
-    var banned: Boolean,
+    var banned: Boolean = false,
 
-    var quit: Boolean,
+    var quit: Boolean = false,
 
     @Column(name = "warn_cnt")
-    var warnCnt: Byte
-)
+    var warnCnt: Byte = 0
+) {
+    fun quit() {
+        quit = true
+    }
+}
