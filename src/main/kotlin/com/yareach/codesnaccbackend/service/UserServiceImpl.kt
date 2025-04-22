@@ -2,12 +2,12 @@ package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.user.UserInfoDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
-import com.yareach.codesnaccbackend.dto.user.toUserInfoDto
 import com.yareach.codesnaccbackend.entity.UserEntity
 import com.yareach.codesnaccbackend.exception.UserIdDuplicateException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
 import com.yareach.codesnaccbackend.repository.UserRepository
 import com.yareach.codesnaccbackend.extensions.findOrThrow
+import com.yareach.codesnaccbackend.extensions.toUserInfoDto
 import jakarta.transaction.Transactional
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
