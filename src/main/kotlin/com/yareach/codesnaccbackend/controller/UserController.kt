@@ -1,5 +1,6 @@
 package com.yareach.codesnaccbackend.controller
 
+import com.yareach.codesnaccbackend.dto.user.UserExistenceResponse
 import com.yareach.codesnaccbackend.dto.user.UserInfoDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
 import com.yareach.codesnaccbackend.service.UserService
@@ -28,5 +29,11 @@ class UserController(
     fun getUserInfo(@PathVariable userId: String): ResponseEntity<UserInfoDto?> {
         val userInfo = userService.getUserInfo(userId)
         return ResponseEntity.ok(userInfo)
+    }
+
+    @GetMapping("/{userId}/check-id")
+    fun isIdExists(@PathVariable userId: String): ResponseEntity<UserExistenceResponse> {
+        val result = userService.isIdExists(userId)
+        return ResponseEntity.ok(UserExistenceResponse(result))
     }
 }

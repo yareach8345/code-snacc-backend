@@ -19,3 +19,12 @@ Content-Type: application/json
 
 ### 유저 조회
 GET localhost:8080/user/testId2
+
+### 존재하지 않는 유저 조회
+GET localhost:8080/user/ThisUserIsNotExists
+
+### 유저 아이디 존재여부 확인 (존재하는 유저일 떄)
+GET localhost:8080/user/testId1/check-id
+
+### 유저 아이디 존재여부 확인 (존재하지 않는 유저일 떄)
+GET localhost:8080/user/ThisUserIsNotExists/check-id
