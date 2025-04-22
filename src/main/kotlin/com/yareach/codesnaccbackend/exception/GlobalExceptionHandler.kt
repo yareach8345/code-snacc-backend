@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import javax.naming.AuthenticationException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -21,5 +22,19 @@ class GlobalExceptionHandler {
     fun handleUserNotFoundException(e: UserNotFoundException) = ErrorResponse(
         code = "USER_NOT_FOUND",
         message = e.message ?: "해당 아이디의 유저를 찾을 수 없습니다: ${e.userId}"
+    )
+
+    @ExceptionHandler(AuthenticationException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleAuthenticationException(ex: AuthenticationException): ErrorResponse = ErrorResponse(
+        code = "AUTHENTICATION_ERROR",
+        message = "인증에 실패 했습니다. ${ex.message}"
+    )
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException): ErrorResponse = ErrorResponse(
+        code = "BAD_REQUEST",
+        message = ex.message
     )
 }
