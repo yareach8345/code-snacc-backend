@@ -1,0 +1,21 @@
+### 유저 회원가입 테스트
+POST localhost:8080/user
+Content-Type: application/json
+
+{
+  "userId": "testId1",
+  "password": "password",
+  "nickname": "nick"
+}
+
+### 유저 회원가입 테스트 닉네임 제외
+POST localhost:8080/user
+Content-Type: application/json
+
+{
+  "userId": "testId2",
+  "password": "password"
+}
+
+### 유저 조회
+GET localhost:8080/user/testId2
