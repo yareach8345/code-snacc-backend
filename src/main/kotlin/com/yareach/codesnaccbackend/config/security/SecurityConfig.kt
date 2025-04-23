@@ -17,10 +17,15 @@ class SecurityConfig {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain =
         http
-            .csrf{ it.disable() }
             .authorizeHttpRequests { it
                 .requestMatchers("/user/**", "/user").permitAll()
-                .anyRequest().permitAll()
-            }
+                .anyRequest().permitAll()}
+            .formLogin { it
+                .loginProcessingUrl("/user/login")
+                .successHandler (CustomAuthenticationSuccessHandler())
+                .permitAll() }
+            .logout { it
+                .logoutUrl("/user/logout") }
+            .csrf{ it.disable() }
             .build()
 }
