@@ -2,7 +2,7 @@ package com.yareach.codesnaccbackend.controller
 
 import com.yareach.codesnaccbackend.dto.user.UserExistenceResponse
 import com.yareach.codesnaccbackend.dto.user.UserInfoDto
-import com.yareach.codesnaccbackend.dto.user.UserInfoEditDto
+import com.yareach.codesnaccbackend.dto.user.UserInfoUpdateDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
 import com.yareach.codesnaccbackend.service.UserService
 import jakarta.servlet.http.HttpServletRequest
@@ -39,18 +39,18 @@ class UserController(
     }
 
     @PatchMapping("/me")
-    fun updateUserInfo(@RequestBody userInfoEditDto: UserInfoEditDto): ResponseEntity<UserInfoDto> {
+    fun updateUserInfo(@RequestBody userInfoUpdateDto: UserInfoUpdateDto): ResponseEntity<UserInfoDto> {
         val userId = SecurityContextHolder.getContext().authentication.name
-        val userInfoAfterUpdate = userService.editUserInfo(userId, userInfoEditDto)
+        val userInfoAfterUpdate = userService.editUserInfo(userId, userInfoUpdateDto)
         return ResponseEntity.ok(userInfoAfterUpdate)
     }
 
     @DeleteMapping("/quit")
-    fun quit(request: HttpServletRequest, response: HttpServletResponse): String{
+    fun quit(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Unit> {
         val id = SecurityContextHolder.getContext().authentication.name
         userService.quit(id)
         SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().authentication)
-        return "quit success"
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/{userId}")

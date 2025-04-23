@@ -1,6 +1,6 @@
 package com.yareach.codesnaccbackend.dto.user
 
-data class UserInfoEditDto(
+data class UserInfoUpdateDto(
     val password: String? = null,
     val nickname: String? = null
 )
