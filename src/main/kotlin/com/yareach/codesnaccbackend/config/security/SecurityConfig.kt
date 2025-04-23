@@ -29,7 +29,8 @@ class SecurityConfig {
                 .failureHandler (CustomAuthenticationFailureHandler())
                 .permitAll() }
             .logout { it
-                .logoutUrl("/logout") }
+                .logoutUrl("/logout")
+                .logoutSuccessHandler(CustomLogoutSuccessHandler()) }
             .csrf{ it.disable() }
             .build()
 }
