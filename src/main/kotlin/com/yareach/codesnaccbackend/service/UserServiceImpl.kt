@@ -1,6 +1,7 @@
 package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.user.UserInfoDto
+import com.yareach.codesnaccbackend.dto.user.UserInfoEditDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
 import com.yareach.codesnaccbackend.entity.UserEntity
 import com.yareach.codesnaccbackend.exception.UserIdDuplicateException
@@ -46,4 +47,19 @@ class UserServiceImpl(
     override fun isIdExists(id: String): Boolean =
         userRepository
             .existsById(id)
+
+    @Transactional
+    override fun editUserInfo(
+        id: String,
+        userInfoEditDto: UserInfoEditDto
+    ): UserInfoDto {
+        val userEntity = userRepository.findOrThrow(id) { UserNotFoundException(id) }
+
+        if(userInfoEditDto.nickname != null)
+            userEntity.nickName = userInfoEditDto.nickname
+        if(userInfoEditDto.password != null)
+            userEntity.password = bCryptPasswordEncoder.encode(userInfoEditDto.password)
+
+        return userEntity.toUserInfoDto()
+    }
 }

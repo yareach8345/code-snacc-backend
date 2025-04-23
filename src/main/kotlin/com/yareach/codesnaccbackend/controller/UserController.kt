@@ -2,10 +2,17 @@ package com.yareach.codesnaccbackend.controller
 
 import com.yareach.codesnaccbackend.dto.user.UserExistenceResponse
 import com.yareach.codesnaccbackend.dto.user.UserInfoDto
+import com.yareach.codesnaccbackend.dto.user.UserInfoEditDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
 import com.yareach.codesnaccbackend.service.UserService
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -23,6 +30,27 @@ class UserController(
         userService.join(userJoinDto)
         val location = URI.create("/user/${userJoinDto.userId}")
         return ResponseEntity.created(location).build()
+    }
+
+    @GetMapping("/me")
+    fun getMyInfo(response: HttpServletResponse) {
+        val myUserId = SecurityContextHolder.getContext().authentication.name
+        response.sendRedirect("/user/$myUserId")
+    }
+
+    @PatchMapping("/me")
+    fun updateUserInfo(@RequestBody userInfoEditDto: UserInfoEditDto): ResponseEntity<UserInfoDto> {
+        val userId = SecurityContextHolder.getContext().authentication.name
+        val userInfoAfterUpdate = userService.editUserInfo(userId, userInfoEditDto)
+        return ResponseEntity.ok(userInfoAfterUpdate)
+    }
+
+    @DeleteMapping("/quit")
+    fun quit(request: HttpServletRequest, response: HttpServletResponse): String{
+        val id = SecurityContextHolder.getContext().authentication.name
+        userService.quit(id)
+        SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().authentication)
+        return "quit success"
     }
 
     @GetMapping("/{userId}")

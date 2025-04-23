@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.config.security
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -18,7 +19,9 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain =
         http
             .authorizeHttpRequests { it
-                .requestMatchers("/user/**", "/user").permitAll()
+                .requestMatchers("/logout").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/user/quit").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/user/{userId}").authenticated()
                 .anyRequest().permitAll()}
             .formLogin { it
                 .loginProcessingUrl("/user/login")
@@ -26,7 +29,7 @@ class SecurityConfig {
                 .failureHandler (CustomAuthenticationFailureHandler())
                 .permitAll() }
             .logout { it
-                .logoutUrl("/user/logout") }
+                .logoutUrl("/logout") }
             .csrf{ it.disable() }
             .build()
 }
