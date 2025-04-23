@@ -2,7 +2,7 @@
 POST localhost:8080/user/login
 Content-Type: application/x-www-form-urlencoded
 
-username=testId1&password=password
+username=tatata&password=q1w2e3r4
 
 ### 로그인 페이지 테스트 실패(없는 아이디)
 POST localhost:8080/user/login
@@ -15,3 +15,6 @@ POST localhost:8080/user/login
 Content-Type: application/x-www-form-urlencoded
 
 username=testId1
+
+### 로그아웃
+POST localhost:8080/logout
