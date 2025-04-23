@@ -21,11 +21,11 @@ class UserServiceImpl(
 
     override fun join(userJoinDto: UserJoinDto) {
         // 아이디 중복 확인
-        if (userRepository.existsById(userJoinDto.userId))
-            throw UserIdDuplicateException(userJoinDto.userId)
+        if (userRepository.existsById(userJoinDto.id))
+            throw UserIdDuplicateException(userJoinDto.id)
 
         val newUser = UserEntity(
-            id = userJoinDto.userId,
+            id = userJoinDto.id,
             password = bCryptPasswordEncoder.encode(userJoinDto.password),
             nickName = userJoinDto.nickName,
         )

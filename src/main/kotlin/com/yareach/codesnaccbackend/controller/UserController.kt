@@ -28,7 +28,7 @@ class UserController(
     @PostMapping()
     fun join(@RequestBody userJoinDto: UserJoinDto): ResponseEntity<Unit> {
         userService.join(userJoinDto)
-        val location = URI.create("/user/${userJoinDto.userId}")
+        val location = URI.create("/user/${userJoinDto.id}")
         return ResponseEntity.created(location).build()
     }
 

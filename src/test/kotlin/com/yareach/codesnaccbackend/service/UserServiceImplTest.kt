@@ -29,14 +29,14 @@ class UserServiceImplTest{
     @DisplayName("회원가입시 Repository에 적절한 Entity를 만들어 전달합니다.")
     fun join() {
         val userJoinDto = UserJoinDto(
-            userId = "testId",
+            id = "testId",
             password = "PASSWORD",
             nickName = "testNickName"
         )
 
         //Repository 모킹 설정
         val captureUser = slot<UserEntity>()
-        every { userRepository.existsById(userJoinDto.userId) }.returns(false)
+        every { userRepository.existsById(userJoinDto.id) }.returns(false)
         every { userRepository.save(capture(captureUser)) } answers { captureUser.captured }
 
         //Encoder 모킹 설정
@@ -46,7 +46,7 @@ class UserServiceImplTest{
         userService.join(userJoinDto)
 
         //id와 nickname은 본래 넣은 값으로 채워져야 함
-        assertEquals(userJoinDto.userId, captureUser.captured.id)
+        assertEquals(userJoinDto.id, captureUser.captured.id)
         assertEquals(userJoinDto.nickName, captureUser.captured.nickName)
         //password는 그대로 들어가면 안되고 암호화 시켜야 함
         assertNotEquals(userJoinDto.password, captureUser.captured.password)
@@ -62,12 +62,12 @@ class UserServiceImplTest{
     @DisplayName("회원가입시 user id가 중복되는 경우")
     fun joinDuplicateUserId() {
         val userJoinDto = UserJoinDto(
-            userId = "testId",
+            id = "testId",
             password = "PASSWORD",
             nickName = "testNickName"
         )
 
-        every { userRepository.existsById(userJoinDto.userId) }.returns(true)
+        every { userRepository.existsById(userJoinDto.id) }.returns(true)
 
         assertThrows(UserIdDuplicateException::class.java) {
             userService.join(userJoinDto)
