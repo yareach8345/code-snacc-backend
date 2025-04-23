@@ -23,6 +23,7 @@ class SecurityConfig {
             .formLogin { it
                 .loginProcessingUrl("/user/login")
                 .successHandler (CustomAuthenticationSuccessHandler())
+                .failureHandler (CustomAuthenticationFailureHandler())
                 .permitAll() }
             .logout { it
                 .logoutUrl("/user/logout") }
