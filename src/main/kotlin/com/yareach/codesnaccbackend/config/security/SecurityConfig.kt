@@ -21,7 +21,7 @@ class SecurityConfig {
             .authorizeHttpRequests { it
                 .requestMatchers("/logout").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/user/quit").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/user/{userId}").authenticated()
+                .requestMatchers("/user/me").authenticated()
                 .anyRequest().permitAll()}
             .formLogin { it
                 .loginProcessingUrl("/user/login")
@@ -32,5 +32,8 @@ class SecurityConfig {
                 .logoutUrl("/logout")
                 .logoutSuccessHandler(CustomLogoutSuccessHandler()) }
             .csrf{ it.disable() }
+            .exceptionHandling { it
+                .authenticationEntryPoint(CustomAuthenticationEntryPoint())
+            }
             .build()
 }
