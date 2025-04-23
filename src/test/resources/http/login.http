@@ -1,0 +1,17 @@
+### 로그인 페이지 테스트
+POST localhost:8080/user/login
+Content-Type: application/x-www-form-urlencoded
+
+username=testId1&password=password
+
+### 로그인 페이지 테스트 실패(없는 아이디)
+POST localhost:8080/user/login
+Content-Type: application/x-www-form-urlencoded
+
+username=NOEXISTSID&password=password
+
+### 로그인 페이지 테스트 실패(패스워드 누락)
+POST localhost:8080/user/login
+Content-Type: application/x-www-form-urlencoded
+
+username=testId1
