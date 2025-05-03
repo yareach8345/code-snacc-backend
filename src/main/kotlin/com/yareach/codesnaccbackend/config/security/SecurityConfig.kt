@@ -24,14 +24,18 @@ class SecurityConfig {
                 .requestMatchers("/user/me").authenticated()
                 .anyRequest().permitAll()}
             .formLogin { it
-                .loginProcessingUrl("/user/login")
+                .loginProcessingUrl("/auth/login")
                 .successHandler (CustomAuthenticationSuccessHandler())
                 .failureHandler (CustomAuthenticationFailureHandler())
                 .permitAll() }
             .logout { it
-                .logoutUrl("/logout")
+                .logoutUrl("/auth/logout")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
                 .logoutSuccessHandler(CustomLogoutSuccessHandler()) }
-            .csrf{ it.disable() }
+            .csrf { it.disable() }
+            .cors {}
             .exceptionHandling { it
                 .authenticationEntryPoint(CustomAuthenticationEntryPoint())
             }
