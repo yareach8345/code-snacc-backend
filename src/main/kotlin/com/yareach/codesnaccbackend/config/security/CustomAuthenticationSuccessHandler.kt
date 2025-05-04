@@ -26,6 +26,7 @@ class CustomAuthenticationSuccessHandler: AuthenticationSuccessHandler {
 
         val json = objectMapper.writeValueAsString(loginResult)
 
+        response.status = HttpServletResponse.SC_OK
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.writer.write(json)
     }

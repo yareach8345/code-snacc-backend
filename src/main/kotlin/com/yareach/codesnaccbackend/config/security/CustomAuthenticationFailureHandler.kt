@@ -25,6 +25,7 @@ class CustomAuthenticationFailureHandler: AuthenticationFailureHandler {
 
         val json = objectMapper.writeValueAsString(loginResult)
 
+        response.status = HttpServletResponse.SC_UNAUTHORIZED
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.characterEncoding = Charsets.UTF_8.name()
         response.writer.write(json)
