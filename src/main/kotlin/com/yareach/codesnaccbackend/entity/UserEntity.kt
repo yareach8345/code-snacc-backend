@@ -18,20 +18,27 @@ class UserEntity (
     @Column(name = "user_id")
     val id: String,
 
+    @Column(nullable = false)
     var password: String,
 
-    @Column(name = "nickname")
+    @Column(name = "nickname", nullable = true)
     var nickName: String? = null,
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     var role: UserRole = UserRole.USER,
 
+    @Column(nullable = false)
     var banned: Boolean = false,
 
+    @Column(nullable = false)
     var quit: Boolean = false,
 
-    @Column(name = "warn_cnt")
-    var warnCnt: Byte = 0
+    @Column(name = "warn_cnt", nullable = false)
+    var warnCnt: Byte = 0,
+
+    @Column(name = "user_icon", nullable = false)
+    var icon: String = "mdi-account-circle"
 ) {
     fun quit() {
         quit = true
