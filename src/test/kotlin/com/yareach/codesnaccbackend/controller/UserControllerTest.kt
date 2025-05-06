@@ -63,7 +63,8 @@ class UserControllerTest {
         val joinDto = UserJoinDto(
             id = "newUser",
             password = "<PASSWORD>",
-            nickName = "testing"
+            nickName = null,
+            icon = null
         )
 
         //유저 정보가 등록되면
@@ -99,7 +100,8 @@ class UserControllerTest {
         val joinDto = UserJoinDto(
             id = "testId1",
             password = "<PASSWORD>",
-            nickName = "testing"
+            nickName = "testing",
+            icon = null
         )
 
         mockMvc

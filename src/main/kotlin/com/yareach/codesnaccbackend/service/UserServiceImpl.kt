@@ -28,6 +28,7 @@ class UserServiceImpl(
             id = userJoinDto.id,
             password = bCryptPasswordEncoder.encode(userJoinDto.password),
             nickName = userJoinDto.nickName,
+            icon = userJoinDto.icon
         )
 
         userRepository.save(newUser)
@@ -59,6 +60,8 @@ class UserServiceImpl(
             userEntity.nickName = userInfoUpdateDto.nickname
         if(userInfoUpdateDto.password != null)
             userEntity.password = bCryptPasswordEncoder.encode(userInfoUpdateDto.password)
+        if(userInfoUpdateDto.icon != null)
+            userEntity.icon = userInfoUpdateDto.icon
 
         return userEntity.toUserInfoDto()
     }

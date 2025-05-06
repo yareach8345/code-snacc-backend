@@ -5,7 +5,9 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
+import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnDefault
 
 enum class UserRole {
     ADMIN, USER
@@ -37,10 +39,16 @@ class UserEntity (
     @Column(name = "warn_cnt", nullable = false)
     var warnCnt: Byte = 0,
 
-    @Column(name = "user_icon", nullable = false)
-    var icon: String = "mdi-account-circle"
+    @Column(name = "user_icon")
+    @ColumnDefault("'mdi-account-circle'")
+    var icon: String? = "mdi-account-circle"
 ) {
     fun quit() {
         quit = true
+    }
+
+    @PrePersist
+    fun iconNullCheck() {
+        if (icon == null) icon = "mdi-account-circle"
     }
 }

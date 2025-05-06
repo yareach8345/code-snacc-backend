@@ -7,5 +7,5 @@ data class UserInfoDto (
     val banned: Boolean,
     val quit: Boolean,
     val warnCnt: Byte,
-    val icon: String
+    val icon: String?
 )

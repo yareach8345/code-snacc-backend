@@ -31,7 +31,8 @@ class UserServiceImplTest{
         val userJoinDto = UserJoinDto(
             id = "testId",
             password = "PASSWORD",
-            nickName = "testNickName"
+            nickName = "testNickName",
+            icon = "mdi-language-c"
         )
 
         //Repository 모킹 설정
@@ -64,7 +65,7 @@ class UserServiceImplTest{
         val userJoinDto = UserJoinDto(
             id = "testId",
             password = "PASSWORD",
-            nickName = "testNickName"
+            nickName = "testNickName",
         )
 
         every { userRepository.existsById(userJoinDto.id) }.returns(true)
