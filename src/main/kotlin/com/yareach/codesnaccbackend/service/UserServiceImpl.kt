@@ -56,12 +56,12 @@ class UserServiceImpl(
     ): UserInfoDto {
         val userEntity = userRepository.findOrThrow(id) { UserNotFoundException(id) }
 
-        if(userInfoUpdateDto.nickname != null)
-            userEntity.nickName = userInfoUpdateDto.nickname
+        if(userInfoUpdateDto.nickName != null)
+            userEntity.nickName = userInfoUpdateDto.nickName.value
         if(userInfoUpdateDto.password != null)
-            userEntity.password = bCryptPasswordEncoder.encode(userInfoUpdateDto.password)
+            userEntity.password = bCryptPasswordEncoder.encode(userInfoUpdateDto.password.value)
         if(userInfoUpdateDto.icon != null)
-            userEntity.icon = userInfoUpdateDto.icon
+            userEntity.icon = userInfoUpdateDto.icon.value
 
         return userEntity.toUserInfoDto()
     }
