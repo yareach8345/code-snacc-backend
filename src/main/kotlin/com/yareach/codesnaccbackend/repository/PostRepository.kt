@@ -1,8 +1,45 @@
 package com.yareach.codesnaccbackend.repository
 
 import com.yareach.codesnaccbackend.entity.PostEntity
+import com.yareach.codesnaccbackend.entity.TagEntity
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 
 @Repository
-interface PostRepository: JpaRepository<PostEntity, Int>
+interface PostRepository: JpaRepository<PostEntity, Int> {
+    @Query("""
+        select p 
+        from PostEntity p 
+        where p.writer.id = :userId 
+        order by p.writtenAt desc
+    """)
+    fun findByWriterId(userId: String): List<PostEntity>
+
+    @Query("""
+        select p 
+        from PostEntity p
+        where :tag member of p.tags
+        order by p.writtenAt desc
+    """)
+    fun findByTag(tag: TagEntity): List<PostEntity>
+
+    @Query("""
+        select p
+        from PostEntity p
+        where cast(p.writtenAt as date) = :date
+        order by size(p.recommends)
+        limit 10
+    """)
+    fun findTop10ByDate(date: LocalDate): List<PostEntity>
+
+    @Query("""
+        select p
+        from PostEntity p
+        where year(p.writtenAt) = year(:data) and month(p.writtenAt) = month(:data)
+        order by size(p.recommends)
+        limit 10
+    """)
+    fun findTop10ByMonth(data: LocalDate): List<PostEntity>
+}

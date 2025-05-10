@@ -20,7 +20,7 @@ class PostEntity (
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    var user: UserEntity,
+    var writer: UserEntity,
 
     @Column(nullable = false)
     var title: String,
