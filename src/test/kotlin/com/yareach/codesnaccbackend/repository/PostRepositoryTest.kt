@@ -7,6 +7,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDate
@@ -69,5 +71,39 @@ class PostRepositoryTest {
         val posts = postRepository.findTop10ByMonth(LocalDate.of(2025, 5, 10))
         println(posts)
         assertNotNull(posts)
+    }
+
+    @Test
+    @DisplayName("N개의 최신 개시글 구하기")
+    fun getWithPaging() {
+        val pageable = PageRequest.of(0, 3, Sort.by("writtenAt").descending())
+        val posts = postRepository.findAll(pageable).toList()
+        assertNotNull(posts)
+        assertEquals(3, posts.size)
+        assertEquals(posts.sortedByDescending { it.writtenAt }, posts)
+
+        val pageable2 = PageRequest.of(1, 3, Sort.by("writtenAt").descending())
+        val posts2 = postRepository.findAll(pageable2).toList()
+        println(posts2)
+        assertNotNull(posts2)
+        assertEquals(2, posts2.size)
+        assertEquals(posts2.sortedByDescending { it.writtenAt }, posts2)
+    }
+
+    @Test
+    @DisplayName("삭제 되지 않은 N개의 최신 개시글 구하기")
+    fun getWithPagingNotDeleted() {
+        val pageable = PageRequest.of(0, 3, Sort.by("writtenAt").descending())
+        val posts = postRepository.findAllByDeletedIsFalse(pageable).toList()
+        assertNotNull(posts)
+        assertEquals(3, posts.size)
+        assertEquals(posts.sortedByDescending { it.writtenAt }, posts)
+
+        val pageable2 = PageRequest.of(1, 3, Sort.by("writtenAt").descending())
+        val posts2 = postRepository.findAllByDeletedIsFalse(pageable2).toList()
+        println(posts2)
+        assertNotNull(posts2)
+        assertEquals(1, posts2.size)
+        assertEquals(posts2.sortedByDescending { it.writtenAt }, posts2)
     }
 }

@@ -3,7 +3,8 @@ VALUES
     (1, 'test-user1', 'test-post1', '<CODE>', '<LANG>', '<CONTENT>', '2025-05-10 00:00:00', false),
     (2, 'test-user1', 'test-post2', '<CODE>', '<LANG>', '<CONTENT>', '2025-05-10 00:00:01', false),
     (3, 'test-user2', 'test-post3', '<CODE>', '<LANG>', '<CONTENT>', '2025-05-10 00:00:06', false),
-    (4, 'admin1', 'test-post4', '<CODE>', '<LANG>', '<CONTENT>', '2025-05-11 00:00:00', false);
+    (4, 'admin1', 'test-post4', '<CODE>', '<LANG>', '<CONTENT>', '2025-05-11 00:00:00', false),
+    (5, 'admin1', 'delete-test-post1', '<CODE>', '<LANG>', '<CONTENT>', '2025-05-11 00:00:00', true);
 
 
 INSERT INTO tags

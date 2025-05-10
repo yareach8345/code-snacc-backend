@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.repository
 
 import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.entity.TagEntity
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -9,10 +10,12 @@ import java.time.LocalDate
 
 @Repository
 interface PostRepository: JpaRepository<PostEntity, Int> {
+    fun findAllByDeletedIsFalse(pageable: Pageable): List<PostEntity>
+
     @Query("""
         select p 
         from PostEntity p 
-        where p.writer.id = :userId 
+        where p.writer.id = :userId and p.deleted = false
         order by p.writtenAt desc
     """)
     fun findByWriterId(userId: String): List<PostEntity>
@@ -20,7 +23,7 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
     @Query("""
         select p 
         from PostEntity p
-        where :tag member of p.tags
+        where :tag member of p.tags and p.deleted = false
         order by p.writtenAt desc
     """)
     fun findByTag(tag: TagEntity): List<PostEntity>
@@ -28,7 +31,7 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
     @Query("""
         select p
         from PostEntity p
-        where cast(p.writtenAt as date) = :date
+        where cast(p.writtenAt as date) = :date and p.deleted = false
         order by size(p.recommends)
         limit 10
     """)
@@ -37,7 +40,7 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
     @Query("""
         select p
         from PostEntity p
-        where year(p.writtenAt) = year(:data) and month(p.writtenAt) = month(:data)
+        where year(p.writtenAt) = year(:data) and month(p.writtenAt) = month(:data) and p.deleted = false
         order by size(p.recommends)
         limit 10
     """)
