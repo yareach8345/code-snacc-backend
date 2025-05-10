@@ -38,3 +38,7 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### .properties files ###
+application-*.properties
+!application-test.properties
