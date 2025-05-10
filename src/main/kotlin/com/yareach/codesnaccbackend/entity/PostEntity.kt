@@ -45,7 +45,7 @@ class PostEntity (
         joinColumns = [JoinColumn(name = "post_id")],
         inverseJoinColumns = [JoinColumn(name = "tag")]
     )
-    var tags: MutableList<TagEntity>,
+    var tags: MutableSet<TagEntity>,
 
     @ManyToMany
     @JoinTable(
@@ -53,7 +53,7 @@ class PostEntity (
         joinColumns = [JoinColumn(name = "post_id")],
         inverseJoinColumns = [JoinColumn(name = "user_id")]
     )
-    var recommend: MutableList<UserEntity>
+    var recommends: MutableSet<UserEntity>
 ) {
     @PrePersist
     fun wittenAtNullCheck() {
@@ -61,5 +61,5 @@ class PostEntity (
             writtenAt = LocalDateTime.now()
     }
 
-    fun getRecommendCount() = recommend.size
+    fun getRecommendCount() = recommends.size
 }
