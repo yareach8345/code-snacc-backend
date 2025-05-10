@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.yareach.codesnaccbackend.dto.user.UpdateField
 import com.yareach.codesnaccbackend.dto.user.UserInfoUpdateDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
-import com.yareach.codesnaccbackend.entity.UserEntity
 import com.yareach.codesnaccbackend.repository.UserRepository
+import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -17,6 +16,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -29,6 +29,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Sql(scripts = ["classpath:db/scripts/init-users.sql"])
+@Transactional
 class UserControllerTest {
 
     @Autowired
@@ -41,23 +43,6 @@ class UserControllerTest {
     lateinit var bCryptPasswordEncoder: BCryptPasswordEncoder
 
     val objectMapper = ObjectMapper()
-
-    @BeforeEach
-    fun setDefaultUsers() {
-        val testUser1 = UserEntity(
-            id = "testId1",
-            password = "<PASSWORD>",
-            nickname = "testNickName1"
-        )
-
-        val testUser2 = UserEntity(
-            id = "testId2",
-            password = "<PASSWORD>",
-        )
-
-        userRepository.save(testUser1)
-        userRepository.save(testUser2)
-    }
 
     @Test
     fun join() {
@@ -99,7 +84,7 @@ class UserControllerTest {
     @Test
     fun joinDuplicateId() {
         val joinDto = UserJoinDto(
-            id = "testId1",
+            id = "test-user1",
             password = "<PASSWORD>",
             nickname = "testing",
             icon = null
@@ -116,13 +101,13 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testId1", password = "<PASSWORD>")
+    @WithMockUser(username = "test-user1", password = "<PASSWORD>")
     fun getMyInfo() {
         mockMvc
             .perform(get("/user/me"))
             .andExpect(status().is3xxRedirection)
             .andExpect(header().exists("Location"))
-            .andExpect(header().string("Location", "/user/testId1"))
+            .andExpect(header().string("Location", "/user/test-user1"))
             .andReturn()
             .response
             .contentAsString
@@ -141,7 +126,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testId1", roles = ["USER"])
+    @WithMockUser(username = "test-user1", roles = ["USER"])
     fun updateUserInfo() {
         val updateDto = UserInfoUpdateDto(
             password = UpdateField(value = "MyAwesomeAndHardNewPassword"),
@@ -154,14 +139,14 @@ class UserControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(updateDto)))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value("testId1"))
+            .andExpect(jsonPath("$.id").value("test-user1"))
             .andExpect(jsonPath("$.nickname").value("AyAwesomeNewName"))
             .andReturn()
             .response
             .contentAsString
             .let{ println(it) }
 
-        val updatedUser = userRepository.findByIdOrNull("testId1")
+        val updatedUser = userRepository.findByIdOrNull("test-user1")
         assertNotNull(updatedUser)
         assertEquals("AyAwesomeNewName", updatedUser?.nickname)
         updateDto.password?.let { assertTrue(bCryptPasswordEncoder.matches(it.value, updatedUser?.password)) }
@@ -187,7 +172,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testId1", roles = ["USER"])
+    @WithMockUser(username = "test-user1", roles = ["USER"])
     fun quit() {
         mockMvc
             .perform(delete("/user/quit"))
@@ -197,7 +182,7 @@ class UserControllerTest {
             .contentAsString
             .let(::println)
 
-        val quitUser = userRepository.findByIdOrNull("testId1")
+        val quitUser = userRepository.findByIdOrNull("test-user1")
         assertNotNull(quitUser)
         assertTrue(quitUser?.quit!!)
         assertFalse(quitUser.banned)
@@ -217,10 +202,10 @@ class UserControllerTest {
     @Test
     fun getUserInfo() {
         mockMvc
-            .perform(get("/user/testId1"))
+            .perform(get("/user/test-user1"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value("testId1"))
-            .andExpect(jsonPath("$.nickname").value("testNickName1"))
+            .andExpect(jsonPath("$.id").value("test-user1"))
+            .andExpect(jsonPath("$.nickname").value("the tester"))
             .andReturn()
             .response
             .contentAsString
@@ -229,7 +214,7 @@ class UserControllerTest {
     @Test
     fun isIdExists() {
         mockMvc
-            .perform(get("/user/testId1/check-id"))
+            .perform(get("/user/test-user1/check-id"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.isExists").value(true))
             .andReturn()
