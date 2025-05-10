@@ -31,7 +31,7 @@ class UserServiceImplTest{
         val userJoinDto = UserJoinDto(
             id = "testId",
             password = "PASSWORD",
-            nickName = "testNickName",
+            nickname = "testNickName",
             icon = "mdi-language-c"
         )
 
@@ -48,7 +48,7 @@ class UserServiceImplTest{
 
         //id와 nickname은 본래 넣은 값으로 채워져야 함
         assertEquals(userJoinDto.id, captureUser.captured.id)
-        assertEquals(userJoinDto.nickName, captureUser.captured.nickName)
+        assertEquals(userJoinDto.nickname, captureUser.captured.nickname)
         //password는 그대로 들어가면 안되고 암호화 시켜야 함
         assertNotEquals(userJoinDto.password, captureUser.captured.password)
         assertEquals("SOMETHING ENCODED VALUE", captureUser.captured.password)
@@ -65,7 +65,7 @@ class UserServiceImplTest{
         val userJoinDto = UserJoinDto(
             id = "testId",
             password = "PASSWORD",
-            nickName = "testNickName",
+            nickname = "testNickName",
         )
 
         every { userRepository.existsById(userJoinDto.id) }.returns(true)
@@ -81,7 +81,7 @@ class UserServiceImplTest{
         val testUserEntity = UserEntity(
             id = "testId",
             password = "<PASSWORD>",
-            nickName = "testNickName",
+            nickname = "testNickName",
             role = UserRole.USER,
             banned = false,
             quit = false,
@@ -93,7 +93,7 @@ class UserServiceImplTest{
         val userInfoDto = userService.getUserInfo("testId")
 
         assertEquals(testUserEntity.id, userInfoDto.id)
-        assertEquals(testUserEntity.nickName, userInfoDto.nickName)
+        assertEquals(testUserEntity.nickname, userInfoDto.nickname)
     }
 
     @Test
@@ -112,7 +112,7 @@ class UserServiceImplTest{
         val testUserEntity = UserEntity(
             id = "testId",
             password = "<PASSWORD>",
-            nickName = "testNickName",
+            nickname = "testNickName",
             role = UserRole.USER,
             banned = false,
             quit = false,

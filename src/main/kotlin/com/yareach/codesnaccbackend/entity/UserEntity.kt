@@ -24,7 +24,7 @@ class UserEntity (
     var password: String,
 
     @Column(name = "nickname", nullable = true)
-    var nickName: String? = null,
+    var nickname: String? = null,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

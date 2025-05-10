@@ -1,6 +1,7 @@
 package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.yareach.codesnaccbackend.dto.user.UpdateField
 import com.yareach.codesnaccbackend.dto.user.UserInfoUpdateDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
 import com.yareach.codesnaccbackend.entity.UserEntity
@@ -46,7 +47,7 @@ class UserControllerTest {
         val testUser1 = UserEntity(
             id = "testId1",
             password = "<PASSWORD>",
-            nickName = "testNickName1"
+            nickname = "testNickName1"
         )
 
         val testUser2 = UserEntity(
@@ -63,7 +64,7 @@ class UserControllerTest {
         val joinDto = UserJoinDto(
             id = "newUser",
             password = "<PASSWORD>",
-            nickName = null,
+            nickname = null,
             icon = null
         )
 
@@ -88,7 +89,7 @@ class UserControllerTest {
             .perform(get("/user/${joinDto.id}"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(joinDto.id))
-            .andExpect(jsonPath("$.nickName").value(joinDto.nickName))
+            .andExpect(jsonPath("$.nickname").value(joinDto.nickname))
             .andExpect(jsonPath("$.role").value("USER"))
             .andExpect(jsonPath("$.banned").value(false))
             .andExpect(jsonPath("$.quit").value(false))
@@ -100,7 +101,7 @@ class UserControllerTest {
         val joinDto = UserJoinDto(
             id = "testId1",
             password = "<PASSWORD>",
-            nickName = "testing",
+            nickname = "testing",
             icon = null
         )
 
@@ -143,8 +144,8 @@ class UserControllerTest {
     @WithMockUser(username = "testId1", roles = ["USER"])
     fun updateUserInfo() {
         val updateDto = UserInfoUpdateDto(
-            password = "MyAwesomeAndHardNewPassword",
-            nickname = "AyAwesomeNewName"
+            password = UpdateField(value = "MyAwesomeAndHardNewPassword"),
+            nickname = UpdateField(value = "AyAwesomeNewName")
         )
 
         mockMvc
@@ -154,7 +155,7 @@ class UserControllerTest {
                     .content(objectMapper.writeValueAsString(updateDto)))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value("testId1"))
-            .andExpect(jsonPath("$.nickName").value("AyAwesomeNewName"))
+            .andExpect(jsonPath("$.nickname").value("AyAwesomeNewName"))
             .andReturn()
             .response
             .contentAsString
@@ -162,15 +163,15 @@ class UserControllerTest {
 
         val updatedUser = userRepository.findByIdOrNull("testId1")
         assertNotNull(updatedUser)
-        assertEquals("AyAwesomeNewName", updatedUser?.nickName)
-        assertTrue(bCryptPasswordEncoder.matches(updateDto.password, updatedUser?.password))
+        assertEquals("AyAwesomeNewName", updatedUser?.nickname)
+        updateDto.password?.let { assertTrue(bCryptPasswordEncoder.matches(it.value, updatedUser?.password)) }
     }
 
     @Test
     fun updateUserInfoWithoutLogin() {
         val updateDto = UserInfoUpdateDto(
-            password = "MyAwesomeAndHardNewPassword",
-            nickname = "AyAwesomeNewName"
+            password = UpdateField(value = "MyAwesomeAndHardNewPassword"),
+            nickname = UpdateField(value = "AyAwesomeNewName")
         )
 
         mockMvc
@@ -219,7 +220,7 @@ class UserControllerTest {
             .perform(get("/user/testId1"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value("testId1"))
-            .andExpect(jsonPath("$.nickName").value("testNickName1"))
+            .andExpect(jsonPath("$.nickname").value("testNickName1"))
             .andReturn()
             .response
             .contentAsString

@@ -27,7 +27,7 @@ class UserServiceImpl(
         val newUser = UserEntity(
             id = userJoinDto.id,
             password = bCryptPasswordEncoder.encode(userJoinDto.password),
-            nickName = userJoinDto.nickName,
+            nickname = userJoinDto.nickname,
             icon = userJoinDto.icon
         )
 
@@ -56,8 +56,8 @@ class UserServiceImpl(
     ): UserInfoDto {
         val userEntity = userRepository.findOrThrow(id) { UserNotFoundException(id) }
 
-        if(userInfoUpdateDto.nickName != null)
-            userEntity.nickName = userInfoUpdateDto.nickName.value
+        if(userInfoUpdateDto.nickname != null)
+            userEntity.nickname = userInfoUpdateDto.nickname.value
         if(userInfoUpdateDto.password != null)
             userEntity.password = bCryptPasswordEncoder.encode(userInfoUpdateDto.password.value)
         if(userInfoUpdateDto.icon != null)
