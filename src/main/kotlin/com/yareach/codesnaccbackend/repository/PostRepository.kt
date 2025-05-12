@@ -53,4 +53,13 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
         limit 10
     """)
     fun findTop10ByMonth(data: LocalDate): List<PostEntity>
+
+    @Query("""
+        select p
+        from PostEntity p
+        where p.deleted = false and p.id not in :excludePostIds
+        order by function('rand')
+        limit 1
+    """)
+    fun getRandomPost(excludePostIds: List<Int> = emptyList()): PostEntity
 }

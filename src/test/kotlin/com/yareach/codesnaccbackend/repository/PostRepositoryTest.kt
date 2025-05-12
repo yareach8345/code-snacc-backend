@@ -106,4 +106,19 @@ class PostRepositoryTest {
         assertEquals(1, posts2.size)
         assertEquals(posts2.sortedByDescending { it.writtenAt }, posts2)
     }
+
+    @Test
+    @DisplayName("랜덤 개시글 조회")
+    fun getRandomPost() {
+        val post = postRepository.getRandomPost()
+        assertNotNull(post)
+    }
+
+    @Test
+    @DisplayName("특정 id 제외하고 랜덤 개시글 조회")
+    fun getRandomPostExcept() {
+        val post = postRepository.getRandomPost(listOf(1, 2, 3))
+        assertNotNull(post)
+        assertEquals(post.id, 4)
+    }
 }
