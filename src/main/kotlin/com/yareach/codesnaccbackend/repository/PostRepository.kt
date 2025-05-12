@@ -21,6 +21,14 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
     fun findByWriterId(userId: String): List<PostEntity>
 
     @Query("""
+        select p
+        from PostEntity p
+        where p.writer.nickname = :nicckname and p.deleted = false
+        order by p.writtenAt desc
+    """)
+    fun findByWriterNickname(nickname: String): List<PostEntity>
+
+    @Query("""
         select p 
         from PostEntity p
         where :tag member of p.tags and p.deleted = false

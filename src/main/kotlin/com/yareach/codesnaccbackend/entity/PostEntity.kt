@@ -62,4 +62,6 @@ class PostEntity (
     }
 
     fun getRecommendCount() = recommends.size
+
+    fun getTagList() = tags.map { it.tag }
 }
