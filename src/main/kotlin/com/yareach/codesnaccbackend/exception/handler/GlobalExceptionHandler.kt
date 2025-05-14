@@ -1,6 +1,9 @@
-package com.yareach.codesnaccbackend.exception
+package com.yareach.codesnaccbackend.exception.handler
 
 import com.yareach.codesnaccbackend.dto.ErrorResponse
+import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
+import com.yareach.codesnaccbackend.exception.UserIdDuplicateException
+import com.yareach.codesnaccbackend.exception.UserNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -35,6 +38,13 @@ class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ErrorResponse = ErrorResponse(
         code = "BAD_REQUEST",
+        message = ex.message
+    )
+
+    @ExceptionHandler(RequiredFieldIsNullException::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleRequiredFieldIsNullException(ex: RequiredFieldIsNullException): ErrorResponse = ErrorResponse(
+        code = "REQUIRED_FIELD_IS_NULL",
         message = ex.message
     )
 }
