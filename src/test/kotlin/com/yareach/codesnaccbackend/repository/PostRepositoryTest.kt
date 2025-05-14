@@ -13,6 +13,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDate
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @DataJpaTest
 @Sql(scripts = [
@@ -120,5 +121,12 @@ class PostRepositoryTest {
         val post = postRepository.getRandomPost(listOf(1, 2, 3))
         assertNotNull(post)
         assertEquals(post.id, 4)
+    }
+
+    @Test
+    @DisplayName("남은 게시글이 더이상 없을때 Null이 반환됨")
+    fun getRandomButNot() {
+        val post = postRepository.getRandomPost(listOf(1, 2, 3, 4))
+        assertNull(post)
     }
 }

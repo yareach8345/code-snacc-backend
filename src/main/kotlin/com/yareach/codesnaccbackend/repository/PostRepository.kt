@@ -61,5 +61,5 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
         order by function('rand')
         limit 1
     """)
-    fun getRandomPost(excludePostIds: List<Int> = emptyList()): PostEntity
+    fun getRandomPost(excludePostIds: List<Int> = emptyList()): PostEntity?
 }
