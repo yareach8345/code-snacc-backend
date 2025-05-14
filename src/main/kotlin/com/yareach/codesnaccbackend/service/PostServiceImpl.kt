@@ -32,10 +32,10 @@ class PostServiceImpl(
             ?.toDto(userId)
 
     override fun getRandomPost(
-        exclude: List<Int>?,
+        exclude: Iterable<Int>?,
         userId: String?
     ): PostInfoResponseDto? =
         postRepository
-            .getRandomPost(exclude ?: emptyList())
+            .getRandomPost(exclude ?: emptySet())
             ?.toDto(userId)
 }

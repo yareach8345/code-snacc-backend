@@ -9,5 +9,5 @@ interface PostService {
 
     fun getPostById(id: Int, userId: String? = null): PostInfoResponseDto?
 
-    fun getRandomPost(exclude: List<Int>?, userId: String? = null): PostInfoResponseDto?
+    fun getRandomPost(exclude: Iterable<Int>? = null, userId: String? = null): PostInfoResponseDto?
 }
