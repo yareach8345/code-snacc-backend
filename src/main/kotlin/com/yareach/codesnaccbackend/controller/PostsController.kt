@@ -43,7 +43,12 @@ class PostsController(
             n = n,
             userId = userId
         )
-        return ResponseEntity.ok(result)
+
+        return if (result.isEmpty()) {
+            ResponseEntity.noContent().build()
+        } else {
+            ResponseEntity.ok(result)
+        }
     }
 
     @GetMapping("/{postId}")
