@@ -35,6 +35,17 @@ class PostsController(
         return ResponseEntity.ok(result)
     }
 
+    @GetMapping("/random")
+    fun getRandomPost(@RequestParam n: Int = 1): ResponseEntity<List<PostInfoResponseDto>> {
+        val userId = getUserId(SecurityContextHolder.getContext().authentication)
+
+        val result = postService.getNRandomPost(
+            n = n,
+            userId = userId
+        )
+        return ResponseEntity.ok(result)
+    }
+
     @GetMapping("/{postId}")
     fun getPost(@PathVariable postId: Int): ResponseEntity<PostInfoResponseDto> {
         val userId = getUserId(SecurityContextHolder.getContext().authentication)

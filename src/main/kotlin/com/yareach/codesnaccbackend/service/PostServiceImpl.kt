@@ -38,4 +38,13 @@ class PostServiceImpl(
         postRepository
             .getRandomPost(exclude ?: emptySet())
             ?.toDto(userId)
+
+    override fun getNRandomPost(
+        exclude: Iterable<Int>?,
+        n: Int,
+        userId: String?
+    ): List<PostInfoResponseDto> =
+        postRepository
+            .getNRandomPost(exclude ?: emptySet(), n)
+            .map { it.toDto(userId) }
 }

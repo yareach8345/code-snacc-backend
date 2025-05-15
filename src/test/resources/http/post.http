@@ -15,3 +15,9 @@ GET http://localhost:8080/posts/1
 
 ### 존재하지 않는 게시글 요청
 GET http://localhost:8080/posts/100
+
+### 랜덤한 게시글 (1개) 요청
+GET http://localhost:8080/posts/random
+
+### 랜덤한 2개의 게시글 요청
+GET http://localhost:8080/posts/random?n=2

@@ -62,4 +62,13 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
         limit 1
     """)
     fun getRandomPost(excludePostIds: Iterable<Int> = emptySet()): PostEntity?
+
+    @Query("""
+        select p
+        from PostEntity p
+        where p.deleted = false and p.id not in :excludePostIds
+        order by function('rand')
+        limit :n
+    """)
+    fun getNRandomPost(excludePostIds: Iterable<Int> = emptySet(), n: Int = 1): List<PostEntity>
 }
