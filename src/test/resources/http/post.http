@@ -10,4 +10,8 @@ GET http://localhost:8080/posts?page=2&pageSize=2
 ### 유효하지 않은 페이지 요청시 error
 GET http://localhost:8080/posts?page=0
 
-###
+### 특정 게시글 요청
+GET http://localhost:8080/posts/1
+
+### 존재하지 않는 게시글 요청
+GET http://localhost:8080/posts/100

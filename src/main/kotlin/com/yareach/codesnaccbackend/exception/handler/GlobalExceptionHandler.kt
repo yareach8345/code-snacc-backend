@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.exception.handler
 
 import com.yareach.codesnaccbackend.dto.ErrorResponse
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
+import com.yareach.codesnaccbackend.exception.PostNotFoundException
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
 import com.yareach.codesnaccbackend.exception.UserIdDuplicateException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
@@ -53,6 +54,13 @@ class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleInvalidPageNumberException(ex: InvalidPageNumberException): ErrorResponse = ErrorResponse(
         code = "INVALID_PAGE_NUMBER",
+        message = ex.message
+    )
+
+    @ExceptionHandler(PostNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handlePostNotFoundException(ex: PostNotFoundException): ErrorResponse = ErrorResponse(
+        code = "POST_NOT_FOUND",
         message = ex.message
     )
 }
