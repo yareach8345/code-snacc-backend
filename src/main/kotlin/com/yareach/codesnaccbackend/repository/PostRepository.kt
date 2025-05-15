@@ -1,7 +1,6 @@
 package com.yareach.codesnaccbackend.repository
 
 import com.yareach.codesnaccbackend.entity.PostEntity
-import com.yareach.codesnaccbackend.entity.TagEntity
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -10,31 +9,15 @@ import java.time.LocalDate
 
 @Repository
 interface PostRepository: JpaRepository<PostEntity, Int> {
-    fun findAllByDeletedIsFalse(pageable: Pageable): List<PostEntity>
+    fun findAllByDeletedIsFalseOrderByWrittenAtDesc(pageable: Pageable): List<PostEntity>
 
-    @Query("""
-        select p 
-        from PostEntity p 
-        where p.writer.id = :userId and p.deleted = false
-        order by p.writtenAt desc
-    """)
-    fun findByWriterId(userId: String): List<PostEntity>
+    fun findAllByDeletedIsFalseAndTitleContainingIgnoreCaseOrderByWrittenAtDesc(title: String, pageable: Pageable? = null): List<PostEntity>
 
-    @Query("""
-        select p
-        from PostEntity p
-        where p.writer.nickname = :nicckname and p.deleted = false
-        order by p.writtenAt desc
-    """)
-    fun findByWriterNickname(nickname: String): List<PostEntity>
+    fun findAllByDeletedIsFalseAndWriterIdOrderByWrittenAtDesc(userId: String, pageable: Pageable? = null): List<PostEntity>
 
-    @Query("""
-        select p 
-        from PostEntity p
-        where :tag member of p.tags and p.deleted = false
-        order by p.writtenAt desc
-    """)
-    fun findByTag(tag: TagEntity): List<PostEntity>
+    fun findAllByDeletedIsFalseAndWriterNicknameOrderByWrittenAtDesc(nickname: String, pageable: Pageable? = null): List<PostEntity>
+
+    fun findAllByDeletedIsFalseAndTagsTagOrderByWrittenAtDesc(tag: String, pageable: Pageable? = null): List<PostEntity>
 
     @Query("""
         select p

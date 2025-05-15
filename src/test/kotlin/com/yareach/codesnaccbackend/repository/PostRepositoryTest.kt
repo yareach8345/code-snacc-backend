@@ -41,7 +41,7 @@ class PostRepositoryTest {
     @Test
     @DisplayName("작성자의 id로 post 조회 테스트")
     fun findTestByAuthorId() {
-        val posts = postRepository.findByWriterId("test-user1")
+        val posts = postRepository.findAllByDeletedIsFalseAndWriterIdOrderByWrittenAtDesc("test-user1")
         assertNotNull(posts)
         assertEquals(setOf("test-user1"), posts.map { it.writer.id }.toSet())
         assertEquals(posts.sortedByDescending { it.writtenAt }, posts)
@@ -51,7 +51,7 @@ class PostRepositoryTest {
     @DisplayName("tag로 post 조회 테스트")
     fun findTestByTag() {
         val tagEntity = TagEntity(tag = "test-tag1")
-        val posts = postRepository.findByTag(tagEntity)
+        val posts = postRepository.findAllByDeletedIsFalseAndTagsTagOrderByWrittenAtDesc(tagEntity.tag)
         assertNotNull(posts)
         assertEquals(2, posts.size)
         assertEquals(setOf(true), posts.map { it.tags.map{ it.tag }.contains(tagEntity.tag) }.toSet())
@@ -95,13 +95,13 @@ class PostRepositoryTest {
     @DisplayName("삭제 되지 않은 N개의 최신 개시글 구하기")
     fun getWithPagingNotDeleted() {
         val pageable = PageRequest.of(0, 3, Sort.by("writtenAt").descending())
-        val posts = postRepository.findAllByDeletedIsFalse(pageable).toList()
+        val posts = postRepository.findAllByDeletedIsFalseOrderByWrittenAtDesc(pageable).toList()
         assertNotNull(posts)
         assertEquals(3, posts.size)
         assertEquals(posts.sortedByDescending { it.writtenAt }, posts)
 
         val pageable2 = PageRequest.of(1, 3, Sort.by("writtenAt").descending())
-        val posts2 = postRepository.findAllByDeletedIsFalse(pageable2).toList()
+        val posts2 = postRepository.findAllByDeletedIsFalseOrderByWrittenAtDesc(pageable2).toList()
         println(posts2)
         assertNotNull(posts2)
         assertEquals(1, posts2.size)
