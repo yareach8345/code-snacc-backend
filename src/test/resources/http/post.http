@@ -1,0 +1,13 @@
+### GET N post
+GET http://localhost:8080/posts
+
+### GET 2 post page 1
+GET http://localhost:8080/posts?page=1&pageSize=2
+
+### GET 2 post page 2
+GET http://localhost:8080/posts?page=2&pageSize=2
+
+### 유효하지 않은 페이지 요청시 error
+GET http://localhost:8080/posts?page=0
+
+###

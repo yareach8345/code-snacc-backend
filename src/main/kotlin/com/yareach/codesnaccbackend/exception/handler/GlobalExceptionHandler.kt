@@ -1,6 +1,7 @@
 package com.yareach.codesnaccbackend.exception.handler
 
 import com.yareach.codesnaccbackend.dto.ErrorResponse
+import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
 import com.yareach.codesnaccbackend.exception.UserIdDuplicateException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
@@ -45,6 +46,13 @@ class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleRequiredFieldIsNullException(ex: RequiredFieldIsNullException): ErrorResponse = ErrorResponse(
         code = "REQUIRED_FIELD_IS_NULL",
+        message = ex.message
+    )
+
+    @ExceptionHandler(InvalidPageNumberException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleInvalidPageNumberException(ex: InvalidPageNumberException): ErrorResponse = ErrorResponse(
+        code = "INVALID_PAGE_NUMBER",
         message = ex.message
     )
 }
