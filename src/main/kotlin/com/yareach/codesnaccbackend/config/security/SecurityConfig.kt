@@ -23,8 +23,7 @@ class SecurityConfig(
         http
             .authorizeHttpRequests { it
                 .requestMatchers("/logout").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/user/quit").authenticated()
-                .requestMatchers("/user/me").authenticated()
+                .requestMatchers("/me/**").authenticated()
                 .anyRequest().permitAll()}
             .formLogin { it
                 .loginProcessingUrl("/auth/login")

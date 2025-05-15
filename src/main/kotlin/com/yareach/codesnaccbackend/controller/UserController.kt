@@ -21,36 +21,15 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 
 @RestController
-@RequestMapping("/user")
-class UserController(
+@RequestMapping("/users")
+class UserController (
     val userService: UserService
 ) {
     @PostMapping()
     fun join(@RequestBody userJoinDto: UserJoinDto): ResponseEntity<Unit> {
         userService.join(userJoinDto)
-        val location = URI.create("/user/${userJoinDto.id}")
+        val location = URI.create("/users/${userJoinDto.id}")
         return ResponseEntity.created(location).build()
-    }
-
-    @GetMapping("/me")
-    fun getMyInfo(response: HttpServletResponse) {
-        val myUserId = SecurityContextHolder.getContext().authentication.name
-        response.sendRedirect("/user/$myUserId")
-    }
-
-    @PatchMapping("/me")
-    fun updateUserInfo(@RequestBody userInfoUpdateDto: UserInfoUpdateDto): ResponseEntity<UserInfoDto> {
-        val userId = SecurityContextHolder.getContext().authentication.name
-        val userInfoAfterUpdate = userService.editUserInfo(userId, userInfoUpdateDto)
-        return ResponseEntity.ok(userInfoAfterUpdate)
-    }
-
-    @DeleteMapping("/quit")
-    fun quit(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Unit> {
-        val id = SecurityContextHolder.getContext().authentication.name
-        userService.quit(id)
-        SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().authentication)
-        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/{userId}")
