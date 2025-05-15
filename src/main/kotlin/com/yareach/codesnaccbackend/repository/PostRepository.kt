@@ -11,13 +11,13 @@ import java.time.LocalDate
 interface PostRepository: JpaRepository<PostEntity, Int> {
     fun findAllByDeletedIsFalseOrderByWrittenAtDesc(pageable: Pageable): List<PostEntity>
 
-    fun findAllByDeletedIsFalseAndTitleContainingIgnoreCaseOrderByWrittenAtDesc(title: String, pageable: Pageable? = null): List<PostEntity>
+    fun findAllByDeletedIsFalseAndTitleContainingOrderByWrittenAtDesc(title: String, pageable: Pageable? = null): List<PostEntity>
 
     fun findAllByDeletedIsFalseAndWriterIdOrderByWrittenAtDesc(userId: String, pageable: Pageable? = null): List<PostEntity>
 
-    fun findAllByDeletedIsFalseAndWriterNicknameOrderByWrittenAtDesc(nickname: String, pageable: Pageable? = null): List<PostEntity>
-
     fun findAllByDeletedIsFalseAndTagsTagOrderByWrittenAtDesc(tag: String, pageable: Pageable? = null): List<PostEntity>
+
+    fun findAllByDeletedIsFalseAndLanguageOrderByWrittenAtDesc(language: String, pageable: Pageable? = null): List<PostEntity>
 
     @Query("""
         select p

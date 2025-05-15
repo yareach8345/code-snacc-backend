@@ -4,8 +4,10 @@ import com.yareach.codesnaccbackend.dto.ErrorResponse
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
+import com.yareach.codesnaccbackend.exception.SearchValueIsEmptyException
 import com.yareach.codesnaccbackend.exception.UserIdDuplicateException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
+import jakarta.transaction.NotSupportedException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -61,6 +63,20 @@ class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handlePostNotFoundException(ex: PostNotFoundException): ErrorResponse = ErrorResponse(
         code = "POST_NOT_FOUND",
+        message = ex.message
+    )
+
+    @ExceptionHandler(NotSupportedException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleNotSupportedException(ex: NotSupportedException): ErrorResponse = ErrorResponse(
+        code = "NOT_SUPPORTED_EXCEPTION",
+        message = ex.message
+    )
+
+    @ExceptionHandler(SearchValueIsEmptyException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleSearchValueIsEmptyException(ex: SearchValueIsEmptyException): ErrorResponse = ErrorResponse(
+        code = "SEARCH_VALUE_IS_EMPTY",
         message = ex.message
     )
 }

@@ -10,6 +10,21 @@ GET http://localhost:8080/posts?page=2&pageSize=2
 ### 유효하지 않은 페이지 요청시 error
 GET http://localhost:8080/posts?page=0
 
+### title로 검색
+GET http://localhost:8080/posts?page=1&searchBy=title&searchValue=test-post2
+
+### writer로 검색
+GET http://localhost:8080/posts?page=1&searchBy=writer&searchValue=test-user1
+
+### tag로 검색
+GET http://localhost:8080/posts?page=1&searchBy=tag&searchValue=test-tag1
+
+### searchBy가 지원 안되는 타입일 때
+GET http://localhost:8080/posts?page=1&searchBy=not-support&searchValue=test-tag1
+
+### searchValue가 비어있을 때
+GET http://localhost:8080/posts?page=1&searchBy=tag
+
 ### 특정 게시글 요청
 GET http://localhost:8080/posts/1
 
