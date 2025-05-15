@@ -3,7 +3,6 @@ package com.yareach.codesnaccbackend.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yareach.codesnaccbackend.dto.user.UpdateField
 import com.yareach.codesnaccbackend.dto.user.UserInfoUpdateDto
-import com.yareach.codesnaccbackend.dto.user.UserJoinDto
 import com.yareach.codesnaccbackend.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.*
@@ -21,18 +20,17 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import kotlin.text.onEach
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Sql(scripts = ["classpath:db/scripts/init-users.sql"])
 @Transactional
-class UserControllerTest {
-
+class MeControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -46,91 +44,101 @@ class UserControllerTest {
     lateinit var objectMapper: ObjectMapper
 
     @Test
-    fun join() {
-        val joinDto = UserJoinDto(
-            id = "newUser",
-            password = "<PASSWORD>",
-            nickname = null,
-            icon = null
+    @WithMockUser(username = "test-user1", roles = ["USER"])
+    fun updateUserInfo() {
+        val updateDto = UserInfoUpdateDto(
+            password = UpdateField(value = "MyAwesomeAndHardNewPassword"),
+            nickname = UpdateField(value = "AyAwesomeNewName")
         )
 
-        //유저 정보가 등록되면
         mockMvc
             .perform(
-                post("/users" )
+                patch("/me")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(joinDto)) )
-            .andExpect(status().isCreated)
-            .andExpect(header().exists("Location"))
-            .andExpect(header().string("Location", "/users/${joinDto.id}"))
+                    .content(objectMapper.writeValueAsString(updateDto)))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value("test-user1"))
+            .andExpect(jsonPath("$.nickname").value("AyAwesomeNewName"))
             .andReturn()
             .response
+            .contentAsString
+            .let{ println(it) }
 
-        //데이터베이스에 유저 정보가 저장되고
-        val newUserEntity = userRepository.findByIdOrNull(joinDto.id)
-        assertNotNull(newUserEntity)
-
-        //추가된 유저의 아이디로 유저의 정보를 불러올 수 있다
-        mockMvc
-            .perform(get("/users/${joinDto.id}"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(joinDto.id))
-            .andExpect(jsonPath("$.nickname").value(joinDto.nickname))
-            .andExpect(jsonPath("$.role").value("USER"))
-            .andExpect(jsonPath("$.banned").value(false))
-            .andExpect(jsonPath("$.quit").value(false))
-            .andExpect(jsonPath("$.warnCnt").value(0))
+        val updatedUser = userRepository.findByIdOrNull("test-user1")
+        assertNotNull(updatedUser)
+        assertEquals("AyAwesomeNewName", updatedUser?.nickname)
+        updateDto.password?.let { assertTrue(bCryptPasswordEncoder.matches(it.value, updatedUser?.password)) }
     }
 
     @Test
-    fun joinDuplicateId() {
-        val joinDto = UserJoinDto(
-            id = "test-user1",
-            password = "<PASSWORD>",
-            nickname = "testing",
-            icon = null
+    fun updateUserInfoWithoutLogin() {
+        val updateDto = UserInfoUpdateDto(
+            password = UpdateField(value = "MyAwesomeAndHardNewPassword"),
+            nickname = UpdateField(value = "AyAwesomeNewName")
         )
 
         mockMvc
-            .perform (
-                post("/users")
+            .perform(
+                patch("/me")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(joinDto)))
-            .andExpect(status().is4xxClientError)
-            .andExpect(jsonPath("$.code").value("USER_ID_DUPLICATE"))
-            .andReturn()
-    }
-
-    @Test
-    fun getUserInfo() {
-        mockMvc
-            .perform(get("/users/test-user1"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value("test-user1"))
-            .andExpect(jsonPath("$.nickname").value("the tester"))
+                    .content(objectMapper.writeValueAsString(updateDto)))
+            .andExpect(status().isUnauthorized)
             .andReturn()
             .response
             .contentAsString
+            .let{ println(it) }
     }
 
     @Test
-    fun isIdExists() {
+    @WithMockUser(username = "test-user1", roles = ["USER"])
+    fun quit() {
         mockMvc
-            .perform(get("/users/test-user1/check-id"))
+            .perform(delete("/me/quit"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.isExists").value(true))
             .andReturn()
             .response
             .contentAsString
             .let(::println)
 
+        val quitUser = userRepository.findByIdOrNull("test-user1")
+        assertNotNull(quitUser)
+        assertTrue(quitUser?.quit!!)
+        assertFalse(quitUser.banned)
+    }
+
+    @Test
+    fun quitWithoutLogin() {
         mockMvc
-            .perform(get("/users/unExistsUser/check-id"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.isExists").value(false))
+            .perform(delete("/me/quit"))
+            .andExpect(status().isUnauthorized)
             .andReturn()
             .response
             .contentAsString
             .let(::println)
+    }
+
+    @Test
+    @WithMockUser(username = "test-user1", password = "<PASSWORD>")
+    fun getMyInfo() {
+        mockMvc
+            .perform(get("/me"))
+            .andExpect(status().is3xxRedirection)
+            .andExpect(header().exists("Location"))
+            .andExpect(header().string("Location", "/users/test-user1"))
+            .andReturn()
+            .response
+            .contentAsString
+            .onEach { println(it) }
+    }
+
+    @Test
+    fun getMyInfoWithLogin() {
+        mockMvc
+            .perform(get("/me"))
+            .andExpect(status().isUnauthorized)
+            .andReturn()
+            .response
+            .contentAsString
+            .let { println(it) }
     }
 }
