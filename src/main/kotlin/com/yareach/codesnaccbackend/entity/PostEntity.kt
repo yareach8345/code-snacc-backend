@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
 import java.time.LocalDateTime
@@ -53,7 +54,10 @@ class PostEntity (
         joinColumns = [JoinColumn(name = "post_id")],
         inverseJoinColumns = [JoinColumn(name = "user_id")]
     )
-    var recommends: MutableSet<UserEntity>
+    var recommends: MutableSet<UserEntity>,
+
+    @OneToMany(mappedBy = "post")
+    var comments: MutableSet<CommentEntity> = mutableSetOf()
 ) {
     @PrePersist
     fun wittenAtNullCheck() {

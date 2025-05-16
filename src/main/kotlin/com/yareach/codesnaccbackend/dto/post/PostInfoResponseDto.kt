@@ -12,6 +12,7 @@ data class PostInfoResponseDto(
     val content: String,
     val writtenAt: LocalDateTime,
     val tags: List<String>,
+    val commentCnt: Int,
     val recommendCnt: Int,
     val didIRecommend: Boolean
 )

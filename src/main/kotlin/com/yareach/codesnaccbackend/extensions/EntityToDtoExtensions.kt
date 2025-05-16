@@ -21,6 +21,7 @@ fun PostEntity.toDto(userId: String?) =
         content = content,
         writtenAt = writtenAt ?: throw RequiredFieldIsNullException("writtenAt", "PostEntity"),
         tags = getTagList(),
+        commentCnt = comments.size,
         recommendCnt = getRecommendCount(),
         didIRecommend = userId in recommends.map { user -> user.id }
     )
