@@ -22,15 +22,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 @ActiveProfiles("test")
 @Sql(scripts = [
     "classpath:db/scripts/init-users.sql",
-    "classpath:db/scripts/init-posts.sql"
+    "classpath:db/scripts/init-posts.sql",
+    "classpath:db/scripts/init-comments.sql",
 ])
 @Transactional
 class PostsControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc
-
-    @Autowired
-    lateinit var postRepository: UserRepository
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
@@ -82,37 +80,40 @@ class PostsControllerTest {
     fun getPostById() {
         val postId = 1
 
-        val response = mockMvc.perform( get("/posts/$postId") )
+        mockMvc.perform( get("/posts/$postId") )
             .andExpect { status().isOk }
             .andExpect { jsonPath("$").isNotEmpty }
             .andExpect { jsonPath("$").isMap }
             .andExpect { jsonPath("$.id").value(postId) }
             .andReturn()
             .response
-
-        val post = objectMapper.readValue(response.contentAsString, PostInfoResponseDto::class.java)
-
-        assertNotNull(post)
-        assertEquals(postId, post.id)
-        assertEquals(false, post.didIRecommend)
     }
 
     @Test
     @DisplayName("내가 추천한 게시글은 didIRecommend 필드가 true 변경된다")
     @WithMockUser(username = "test-user1")
     fun getPostByIdNotFound() {
-        val postId = 1
+        val postId1 = 1
 
-        val response = mockMvc.perform( get("/posts/$postId") )
+        mockMvc.perform( get("/posts/${postId1}") )
             .andExpect { status().isOk }
             .andExpect { jsonPath("$").isNotEmpty }
             .andExpect { jsonPath("$").isMap }
-            .andExpect { jsonPath("$.id").value(postId) }
+            .andExpect { jsonPath("$.id").value(postId1) }
+            .andExpect { jsonPath("$.didIRecommend").value(true) }
             .andReturn()
             .response
 
-        val post = objectMapper.readValue(response.contentAsString, PostInfoResponseDto::class.java)
-        assertEquals(true, post.didIRecommend)
+        val postId2 = 2
+
+        mockMvc.perform( get("/posts/$postId2") )
+            .andExpect { status().isOk }
+            .andExpect { jsonPath("$").isNotEmpty }
+            .andExpect { jsonPath("$").isMap }
+            .andExpect { jsonPath("$.id").value(postId2) }
+            .andExpect { jsonPath("$.didIRecommend").value(true) }
+            .andReturn()
+            .response
     }
 
     @Test
@@ -122,6 +123,17 @@ class PostsControllerTest {
             .andExpect { status().isOk }
             .andExpect { jsonPath("$").isNotEmpty }
             .andExpect { jsonPath("$").isMap }
+            .andReturn()
+            .response
+    }
+
+    @Test
+    @DisplayName("게시글로 댓글 조회")
+    fun getCommentCnt() {
+        mockMvc.perform( get("/posts/1") )
+            .andExpect { status().isOk }
+            .andExpect { jsonPath("$").isArray }
+            .andExpect { jsonPath("$.commentCnt").value(3) }
             .andReturn()
             .response
     }

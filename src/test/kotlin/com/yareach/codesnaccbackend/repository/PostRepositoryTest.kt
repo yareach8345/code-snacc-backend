@@ -18,7 +18,8 @@ import kotlin.test.assertNull
 @DataJpaTest
 @Sql(scripts = [
     "classpath:db/scripts/init-users.sql",
-    "classpath:db/scripts/init-posts.sql"
+    "classpath:db/scripts/init-posts.sql",
+    "classpath:db/scripts/init-comments.sql"
 ])
 @Transactional
 class PostRepositoryTest {
@@ -36,6 +37,7 @@ class PostRepositoryTest {
         assertEquals(setOf("test-tag1", "test-tag2"), post.tags.map { it.tag }.toSet())
         assertEquals(4, post.recommends.size)
         assertEquals(setOf("test-user1", "test-user2", "admin1", "black-sheep"), post.recommends.map{ it.id }.toSet())
+        assertEquals(3, post.comments.size)
     }
 
     @Test

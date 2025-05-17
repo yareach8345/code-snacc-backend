@@ -35,7 +35,6 @@ CREATE TABLE comments (
                           content TEXT NOT NULL,
                           writer VARCHAR(255) NOT NULL,
                           written_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                          recommend_cnt INT NOT NULL,
                           deleted BOOL NOT NULL DEFAULT false,
                           FOREIGN KEY (writer) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
                           FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE ON UPDATE CASCADE
