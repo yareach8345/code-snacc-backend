@@ -1,8 +1,10 @@
 package com.yareach.codesnaccbackend.repository
 
+import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.entity.TagEntity
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,6 +16,7 @@ import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDate
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @DataJpaTest
 @Sql(scripts = [
@@ -26,12 +29,18 @@ class PostRepositoryTest {
     @Autowired
     lateinit var postRepository: PostRepository
 
+    @Autowired
+    lateinit var userRepository: UserRepository
+
+    @Autowired
+    lateinit var tagRepository: TagRepository
+
     @Test
     @DisplayName("기본적은 post 조회 테스트")
     fun findTest() {
-        val post = postRepository.findByIdOrNull(1)
+        val post = postRepository.findByIdOrNull(0)
         assertNotNull(post)
-        assertEquals(1, post.id)
+        assertEquals(0, post.id)
         assertEquals("test-post1", post.title)
         assertEquals(2, post.tags.size)
         assertEquals(setOf("test-tag1", "test-tag2"), post.tags.map { it.tag }.toSet())
@@ -120,15 +129,50 @@ class PostRepositoryTest {
     @Test
     @DisplayName("특정 id 제외하고 랜덤 개시글 조회")
     fun getRandomPostExcept() {
-        val post = postRepository.getRandomPost(listOf(1, 2, 3))
+        val post = postRepository.getRandomPost(listOf(0, 1, 2))
         assertNotNull(post)
-        assertEquals(post.id, 4)
+        assertEquals(post.id, 3)
     }
 
     @Test
     @DisplayName("남은 게시글이 더이상 없을때 Null이 반환됨")
     fun getRandomButNot() {
-        val post = postRepository.getRandomPost(listOf(1, 2, 3, 4))
+        val post = postRepository.getRandomPost(listOf(0, 1, 2, 3))
         assertNull(post)
+    }
+
+    @Test
+    @DisplayName("save post")
+    @Transactional
+    fun savePost() {
+        val user = userRepository.findById("test-user1").get()
+        val tags = tagRepository.findByTagIn(setOf("test-tag1", "test-tag2")).toMutableSet()
+
+        val post = postRepository.save(
+            PostEntity(
+                title = "test-post-save",
+                content = "test-content-save",
+                writer = user,
+                tags = tags,
+                code = "Java Code",
+                language = "Java"
+            )
+        )
+
+        val savedPost = postRepository.findByIdOrNull(post.id)
+
+        assertNotNull(savedPost)
+        assertEquals("test-post-save", savedPost.title)
+        assertEquals("test-content-save", savedPost.content)
+        assertEquals("test-user1", savedPost.writer.id)
+        assertFalse(savedPost.tags.isEmpty())
+        assertEquals(2, savedPost.tags.size)
+        assertTrue { savedPost.tags.map { it.tag }.let{
+           "test-tag1" in it && "test-tag2" in it
+        } }
+        assertEquals("Java Code", savedPost.code)
+        assertEquals("Java", savedPost.language)
+        assertTrue(savedPost.recommends.isEmpty())
+        assertTrue(savedPost.comments.isEmpty())
     }
 }

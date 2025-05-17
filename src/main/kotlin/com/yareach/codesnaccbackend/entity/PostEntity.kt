@@ -2,6 +2,8 @@ package com.yareach.codesnaccbackend.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
@@ -16,6 +18,7 @@ import java.time.LocalDateTime
 @Table(name = "posts")
 class PostEntity (
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     var id: Int? = null,
 
@@ -54,7 +57,7 @@ class PostEntity (
         joinColumns = [JoinColumn(name = "post_id")],
         inverseJoinColumns = [JoinColumn(name = "user_id")]
     )
-    var recommends: MutableSet<UserEntity>,
+    var recommends: MutableSet<UserEntity> = mutableSetOf(),
 
     @OneToMany(mappedBy = "post")
     var comments: MutableSet<CommentEntity> = mutableSetOf()

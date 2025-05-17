@@ -2,13 +2,15 @@ package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
-import com.yareach.codesnaccbackend.repository.UserRepository
+import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import jakarta.transaction.Transactional
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.jdbc.Sql
@@ -134,6 +136,30 @@ class PostsControllerTest {
             .andExpect { status().isOk }
             .andExpect { jsonPath("$").isArray }
             .andExpect { jsonPath("$.commentCnt").value(3) }
+            .andReturn()
+            .response
+    }
+
+    @Test
+    @DisplayName("게시글 작성 테스트")
+    @WithMockUser(username = "test-user1")
+    fun createPost() {
+        val postDto = PostUploadDto(
+            writerId = "test-user1",
+            title = "test-title",
+            code = "test-code",
+            language = "test-language",
+            content = "test-content",
+            tags = listOf("test-tag1", "test-tag2")
+        )
+
+        mockMvc.perform(
+            post("/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postDto)))
+            .andExpect(status().isCreated)
+            .andExpect(header().exists("Location"))
+            .andExpect(header().string("Location", Matchers.startsWith("/posts/")))
             .andReturn()
             .response
     }

@@ -1,5 +1,6 @@
 package com.yareach.codesnaccbackend.service
 
+import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.entity.TagEntity
 import com.yareach.codesnaccbackend.entity.UserEntity
@@ -7,6 +8,8 @@ import com.yareach.codesnaccbackend.entity.UserRole
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
 import com.yareach.codesnaccbackend.extensions.findOrThrow
 import com.yareach.codesnaccbackend.repository.PostRepository
+import com.yareach.codesnaccbackend.repository.TagRepository
+import com.yareach.codesnaccbackend.repository.UserRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -15,11 +18,18 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Pageable
 import java.time.LocalDateTime
+import java.util.Optional
 
 class PostServiceImplTest {
     val postRepository = mockk<PostRepository>()
+    val userRepository = mockk<UserRepository>()
+    val tagRepository = mockk<TagRepository>()
 
-    val postService = PostServiceImpl(postRepository)
+    val postService = PostServiceImpl(
+        postRepository,
+        userRepository,
+        tagRepository
+    )
 
     @Test
     @DisplayName("N개의 post 조회 테스트")
@@ -169,5 +179,52 @@ class PostServiceImplTest {
             ) }
 
         assertThrows(RequiredFieldIsNullException::class.java) { postService.getPostById(1) }
+    }
+
+    @Test
+    @DisplayName("post 작성 테스트")
+    fun uploadPost() {
+        val capturePost = slot<PostEntity>()
+        val captureTag = slot<Collection<String>>()
+        every { postRepository.save(capture(capturePost)) }.answers {
+            capturePost
+                .captured
+                .apply {
+                    id = 0
+                }
+        }
+
+        every { userRepository.findById("test-user1") }.answers {
+            UserEntity(
+                id = "test-user1",
+                password = "<PASSWORD>",
+                role = UserRole.USER,
+            ).let { Optional.of(it) }
+        }
+
+        every { tagRepository.findByTagIn(capture(captureTag)) }.answers {
+            captureTag.captured.map { TagEntity(tag = it) }.toMutableSet()
+        }
+
+        val postUploadDto = PostUploadDto(
+            writerId = "test-user1",
+            title = "test-title",
+            code = "test-code",
+            language = "test-language",
+            content = "test-content",
+            tags = listOf("test-tag1", "test-tag2")
+        )
+
+        postService.uploadPost(postUploadDto)
+
+        assertEquals("test-user1", capturePost.captured.writer.id)
+        assertEquals("test-title", capturePost.captured.title)
+        assertEquals("test-code", capturePost.captured.code)
+        assertEquals("test-language", capturePost.captured.language)
+        assertEquals("test-content", capturePost.captured.content)
+        assertEquals(2, capturePost.captured.tags.size)
+        assertTrue { capturePost.captured.tags.map { it.tag }.let{
+            "test-tag1" in it && "test-tag2" in it
+        }}
     }
 }
