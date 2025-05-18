@@ -60,7 +60,7 @@ class PostsControllerTest {
         val pageSize = 100
         val pageNumber = 0
 
-        val response = mockMvc.perform( get("/posts?pageSize=$pageSize&pageNumber=$pageNumber&searchBy=tag&searchValue=$tag") )
+        val response = mockMvc.perform( get("/posts?pageSize=$pageSize&pageNumber=$pageNumber&tags=$tag") )
             .andExpect { status().isOk }
             .andExpect { jsonPath("$").isArray }
             .andExpect { jsonPath("$") }

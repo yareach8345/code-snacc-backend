@@ -175,4 +175,85 @@ class PostRepositoryTest {
         assertTrue(savedPost.recommends.isEmpty())
         assertTrue(savedPost.comments.isEmpty())
     }
+
+    @Test
+    @DisplayName("search by 테스트 1 - 별다른 조건이 없을 때 모든 게시글 반환")
+    fun searchBy() {
+        val countOfAllOfPosts = postRepository.countByDeletedIsFalse()
+        val searchResult = postRepository.searchBy()
+
+        assertEquals(countOfAllOfPosts, searchResult.size)
+        assertEquals(searchResult.sortedByDescending { it.writtenAt }, searchResult)
+    }
+
+    @Test
+    @DisplayName("search by 테스트 2 - pageable")
+    fun searchByWithPaging() {
+        val pageable = PageRequest.of(0, 3, Sort.by("written_at").descending())
+        val searchResult = postRepository.searchBy(pageable = pageable)
+
+        assertEquals(3, searchResult.size)
+    }
+
+    @Test
+    @DisplayName("search by 테스트 3 - title")
+    fun searchByWithTitle() {
+        val searchResult = postRepository.searchBy(title = "test-post1")
+
+        assertTrue(searchResult.all { it.title == "test-post1" })
+    }
+
+    @Test
+    @DisplayName("search by 테스트 4 - tag (단일)")
+    fun searchByWithTag() {
+        val searchResult = postRepository.searchBy(tags = listOf("test-tag1"))
+
+        assertTrue( searchResult.all { it.tags.map{ it.tag }.contains("test-tag1") })
+    }
+
+    @Test
+    @DisplayName("search by 테스트 4 - tag (복수)")
+    fun searchByWithPloralTag() {
+        val searchResult = postRepository.searchBy(tags = listOf("test-tag1", "test-tag2"))
+
+        assertTrue(searchResult.all { it.tags.map{ it.tag }.let{ it.contains("test-tag1") && it.contains("test-tag2") } })
+    }
+
+    @Test
+    @DisplayName("search by 테스트 5 - userId")
+    fun searchByWithUserId() {
+        val searchResult = postRepository.searchBy(userId = "test-user1")
+
+        assertTrue(searchResult.all { it.writer.id == "test-user1" })
+    }
+
+    @Test
+    @DisplayName("search by 테스트 6 - language")
+    fun searchByWithLanguage() {
+        val searchResult = postRepository.searchBy(language = "<LANG>")
+
+        assertTrue(searchResult.all { it.language == "<LANG>" })
+    }
+
+    @Test
+    @DisplayName("search by 테스트 7 - 복합")
+    fun searchByWithCode() {
+        val searchResult = postRepository.searchBy(
+            userId = "test-user1",
+            title = "test-post",
+            tags = listOf("test-tag1", "test-tag2"),
+        )
+
+        assertTrue {
+            searchResult.all { it.writer.id == "test-user1" }
+        }
+
+        assertTrue {
+            searchResult.all { it.title.startsWith("test-post") }
+        }
+
+        assertTrue {
+            searchResult.all { it.tags.map{ it.tag }.let{ it.contains("test-tag1") && it.contains("test-tag2") } }
+        }
+    }
 }

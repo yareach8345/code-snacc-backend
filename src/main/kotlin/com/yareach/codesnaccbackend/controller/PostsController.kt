@@ -1,14 +1,11 @@
 package com.yareach.codesnaccbackend.controller
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
-import com.yareach.codesnaccbackend.dto.post.PostSearchOption
-import com.yareach.codesnaccbackend.dto.post.PostSearchOptionType
+import com.yareach.codesnaccbackend.dto.post.PostSearchDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.exception.AccessDeniedException
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
-import com.yareach.codesnaccbackend.exception.NotSupportSearchOptionException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
-import com.yareach.codesnaccbackend.exception.SearchValueIsEmptyException
 import com.yareach.codesnaccbackend.service.PostService
 import com.yareach.codesnaccbackend.util.getUserId
 import org.springframework.http.ResponseEntity
@@ -29,28 +26,26 @@ class PostsController(
 ) {
     @GetMapping
     fun getNPosts(
-        @RequestParam searchBy: String?,
-        @RequestParam searchValue: String?,
+        @RequestParam title: String?,
+        @RequestParam writerId: String?,
+        @RequestParam tags: List<String>?,
+        @RequestParam lang: String?,
         @RequestParam page: Int?,
         @RequestParam pageSize: Int?
     ): ResponseEntity<List<PostInfoResponseDto>> {
-        println("searchBy: $searchBy, searchValue: $searchValue, page: $page, pageSize: $pageSize")
         if (page != null && page < 1) {
            throw InvalidPageNumberException()
         }
 
-        val searchOption = searchBy?.let { it -> PostSearchOption(
-            PostSearchOptionType.entries.find { it.name == searchBy.uppercase() } ?: throw NotSupportSearchOptionException(searchBy),
-            searchValue ?: throw SearchValueIsEmptyException(it)
-        )}
+        val searchDto = PostSearchDto(title, writerId, tags, lang)
 
         val userId = getUserId(SecurityContextHolder.getContext().authentication)
 
         val result = postService.getNPosts(
             pageSize ?: 10,
             page?.let{ it - 1 } ?: 0,
-            searchOption,
             userId,
+            searchDto
         )
 
         return ResponseEntity.ok(result)

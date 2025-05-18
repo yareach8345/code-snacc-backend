@@ -38,7 +38,7 @@ class PostEntity (
     @Column(nullable = false)
     var content: String,
 
-    @Column(nullable = false)
+    @Column(name="written_at", nullable = false)
     var writtenAt: LocalDateTime? = null,
 
     var deleted: Boolean = false,

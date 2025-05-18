@@ -1,8 +1,7 @@
 package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
-import com.yareach.codesnaccbackend.dto.post.PostSearchOption
-import com.yareach.codesnaccbackend.dto.post.PostSearchOptionType
+import com.yareach.codesnaccbackend.dto.post.PostSearchDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
@@ -22,18 +21,15 @@ class PostServiceImpl(
     val userRepository: UserRepository,
     val tagRepository: TagRepository
 ): PostService {
-    override fun getNPosts(
-        n: Int,
-        page: Int,
-        searchOption: PostSearchOption?,
-        userId: String?
-    ): List<PostInfoResponseDto> = when(searchOption?.searchBy) {
-        null -> postRepository.findAllByDeletedIsFalseOrderByWrittenAtDesc(PageRequest.of(page, n, Sort.by("writtenAt").descending()))
-        PostSearchOptionType.TITLE -> postRepository.findAllByDeletedIsFalseAndTitleContainingOrderByWrittenAtDesc(searchOption.searchValue, PageRequest.of(page, n, Sort.by("writtenAt").descending()))
-        PostSearchOptionType.TAG -> postRepository.findAllByDeletedIsFalseAndTagsTagOrderByWrittenAtDesc(searchOption.searchValue, PageRequest.of(page, n, Sort.by("writtenAt").descending()))
-        PostSearchOptionType.LANGUAGE -> postRepository.findAllByDeletedIsFalseAndLanguageOrderByWrittenAtDesc(searchOption.searchValue, PageRequest.of(page, n, Sort.by("writtenAt").descending()))
-        PostSearchOptionType.WRITER -> postRepository.findAllByDeletedIsFalseAndWriterIdOrderByWrittenAtDesc(searchOption.searchValue, PageRequest.of(page, n, Sort.by("writtenAt").descending()))
-    }.map { it.toDto(userId) }
+    override fun getNPosts(n: Int, page: Int, userId: String?, searchDto: PostSearchDto?): List<PostInfoResponseDto> =
+        postRepository
+            .searchBy(
+                title = searchDto?.title,
+                userId = searchDto?.writerId,
+                tags = searchDto?.tags ?: emptySet(),
+                language = searchDto?.language,
+                pageable = PageRequest.of(page, n, Sort.by("written_at").descending())
+            ).map { it.toDto(userId) }
 
     override fun getPostById(
         id: Int,

@@ -35,7 +35,7 @@ class PostServiceImplTest {
     @DisplayName("N개의 post 조회 테스트")
     fun getNPosts() {
         val capturePost = slot<Pageable>()
-        every { postRepository.findAllByDeletedIsFalseOrderByWrittenAtDesc(capture(capturePost)) }
+        every { postRepository.searchBy(pageable = capture(capturePost)) }
             .answers {
                 val startId = capturePost.captured.pageNumber * capturePost.captured.pageSize
                 val endId = startId + capturePost.captured.pageSize

@@ -1,7 +1,9 @@
 package com.yareach.codesnaccbackend.repository
 
 import com.yareach.codesnaccbackend.entity.PostEntity
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -18,6 +20,24 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
     fun findAllByDeletedIsFalseAndTagsTagOrderByWrittenAtDesc(tag: String, pageable: Pageable? = null): List<PostEntity>
 
     fun findAllByDeletedIsFalseAndLanguageOrderByWrittenAtDesc(language: String, pageable: Pageable? = null): List<PostEntity>
+
+    @Query("""
+        select p.*
+        from posts p
+        left join post_tags pt on pt.post_id = p.post_id
+        left join tags t on pt.tag = t.tag
+        where p.deleted = false and 
+            (:title is null or p.title like concat('%', :title, '%')) and 
+            (:userId is null or p.user_id = :userId) and
+            (:tags is null or t.tag in (:tags)) and
+            (:language is null or p.lang = :language)
+        group by p.post_id
+        having :tagSize = 0 or count(distinct t.tag) >= :tagSize
+        order by p.written_at desc
+        """,
+        nativeQuery = true,
+    )
+    fun searchBy(title: String? = null, userId: String? = null, tags: Collection<String> = emptySet(), language: String? = null, tagSize: Int = tags.size, pageable: Pageable = PageRequest.of(0, 10, Sort.by("written_at").descending())): List<PostEntity>
 
     @Query("""
         select p
@@ -54,4 +74,6 @@ interface PostRepository: JpaRepository<PostEntity, Int> {
         limit :n
     """)
     fun getNRandomPost(excludePostIds: Iterable<Int> = emptySet(), n: Int = 1): List<PostEntity>
+
+    fun countByDeletedIsFalse(): Int
 }
