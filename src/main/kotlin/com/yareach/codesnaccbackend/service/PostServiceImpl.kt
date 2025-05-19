@@ -28,7 +28,7 @@ class PostServiceImpl(
                 userId = searchDto?.writerId,
                 tags = searchDto?.tags ?: emptySet(),
                 language = searchDto?.language,
-                pageable = PageRequest.of(page, n, Sort.by("written_at").descending())
+                pageable = PageRequest.of(page, n, Sort.by("writtenAt").descending())
             ).map { it.toDto(userId) }
 
     override fun getPostById(

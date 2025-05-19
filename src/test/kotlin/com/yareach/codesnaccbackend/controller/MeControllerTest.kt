@@ -93,7 +93,7 @@ class MeControllerTest {
     @WithMockUser(username = "test-user1", roles = ["USER"])
     fun quit() {
         mockMvc
-            .perform(delete("/me/quit"))
+            .perform(patch("/me/quit"))
             .andExpect(status().isOk)
             .andReturn()
             .response

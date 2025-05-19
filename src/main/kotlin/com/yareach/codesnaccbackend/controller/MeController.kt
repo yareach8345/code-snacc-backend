@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -33,8 +32,9 @@ class MeController (
         return ResponseEntity.ok(userInfoAfterUpdate)
     }
 
-    @DeleteMapping("/quit")
+    @PatchMapping("/quit")
     fun quit(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Unit> {
+        println("asdfasdfasdf")
         val id = SecurityContextHolder.getContext().authentication.name
         userService.quit(id)
         SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().authentication)

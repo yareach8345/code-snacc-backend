@@ -189,7 +189,7 @@ class PostRepositoryTest {
     @Test
     @DisplayName("search by 테스트 2 - pageable")
     fun searchByWithPaging() {
-        val pageable = PageRequest.of(0, 3, Sort.by("written_at").descending())
+        val pageable = PageRequest.of(0, 3, Sort.by("writtenAt").descending())
         val searchResult = postRepository.searchBy(pageable = pageable)
 
         assertEquals(3, searchResult.size)

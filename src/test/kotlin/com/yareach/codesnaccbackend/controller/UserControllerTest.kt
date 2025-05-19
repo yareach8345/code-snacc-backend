@@ -40,9 +40,6 @@ class UserControllerTest {
     lateinit var userRepository: UserRepository
 
     @Autowired
-    lateinit var bCryptPasswordEncoder: BCryptPasswordEncoder
-
-    @Autowired
     lateinit var objectMapper: ObjectMapper
 
     @Test

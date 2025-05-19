@@ -39,9 +39,9 @@ class PostsControllerTest {
     @DisplayName("N개의 post 조회 테스트")
     fun getNPosts() {
         val pageSize = 3
-        val pageNumber = 0
+        val pageNumber = 1
 
-        val response = mockMvc.perform( get("/posts?pageSize=$pageSize&pageNumber=$pageNumber") )
+        val response = mockMvc.perform( get("/posts?pageSize=$pageSize&page=$pageNumber") )
             .andExpect { status().isOk }
             .andExpect { jsonPath("$").isArray }
             .andExpect { jsonPath("$") }
