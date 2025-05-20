@@ -2,12 +2,13 @@ package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
+import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 
 interface PostService {
 
     //functions for reading
-    fun getNPosts(n: Int, page: Int = 0, userId: String? = null, searchDto: PostSearchDto? = null): List<PostInfoResponseDto>
+    fun searchPosts(pageSize: Int, page: Int = 0, userId: String? = null, searchDto: PostSearchDto? = null): SearchPostResultDto
 
     fun getPostById(id: Int, userId: String? = null): PostInfoResponseDto?
 

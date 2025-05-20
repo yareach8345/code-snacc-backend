@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.controller
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
+import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.exception.AccessDeniedException
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
@@ -32,7 +33,7 @@ class PostsController(
         @RequestParam lang: String?,
         @RequestParam page: Int?,
         @RequestParam pageSize: Int?
-    ): ResponseEntity<List<PostInfoResponseDto>> {
+    ): ResponseEntity<SearchPostResultDto> {
         if (page != null && page < 1) {
            throw InvalidPageNumberException()
         }
@@ -41,7 +42,7 @@ class PostsController(
 
         val userId = getUserId(SecurityContextHolder.getContext().authentication)
 
-        val result = postService.getNPosts(
+        val result = postService.searchPosts(
             pageSize ?: 10,
             page?.let{ it - 1 } ?: 0,
             userId,

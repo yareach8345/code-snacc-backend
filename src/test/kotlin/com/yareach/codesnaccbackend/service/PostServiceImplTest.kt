@@ -33,9 +33,9 @@ class PostServiceImplTest {
 
     @Test
     @DisplayName("N개의 post 조회 테스트")
-    fun getNPosts() {
+    fun searchPosts() {
         val capturePost = slot<Pageable>()
-        every { postRepository.searchBy(pageable = capture(capturePost)) }
+        every { postRepository.findPostsBySearchCondition(pageable = capture(capturePost)) }
             .answers {
                 val startId = capturePost.captured.pageNumber * capturePost.captured.pageSize
                 val endId = startId + capturePost.captured.pageSize
@@ -60,9 +60,15 @@ class PostServiceImplTest {
                         recommends = mutableSetOf(mockUserEntity)
                     )}
             }
+        every { postRepository.countBySearchCondition() }.answers { 100 }
 
         // 10개를 한 페이지의 크기로. 첫번째 페이지를 가져옴
-        val postsOnFirstPage = postService.getNPosts(10, 0, null)
+        val firstPageResult = postService.searchPosts(10, 0, null)
+        val postsOnFirstPage = firstPageResult.posts
+
+        assertEquals(100, firstPageResult.numberOfPosts)
+
+        assertEquals(10, firstPageResult.posts.size)
 
         assertEquals(0, capturePost.captured.pageNumber)
         assertEquals(10, capturePost.captured.pageSize)
@@ -72,7 +78,12 @@ class PostServiceImplTest {
         assertEquals(9, postsOnFirstPage.last().id)
 
         // 5개를 한 페이지의 크기로. 세번째 페이지를 가져옴
-        val postsOnThirdPage = postService.getNPosts(5, 2, null)
+        val thirdPageResult = postService.searchPosts(5, 2, null)
+        val postsOnThirdPage = thirdPageResult.posts
+
+        assertEquals(100, firstPageResult.numberOfPosts)
+
+        assertEquals(5, thirdPageResult.posts.size)
 
         assertEquals(2, capturePost.captured.pageNumber)
         assertEquals(5, capturePost.captured.pageSize)

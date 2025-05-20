@@ -3,6 +3,7 @@ package com.yareach.codesnaccbackend.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
+import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import jakarta.transaction.Transactional
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Assertions.*
@@ -48,9 +49,9 @@ class PostsControllerTest {
             .andReturn()
             .response
 
-        val postList = objectMapper.readValue(response.contentAsString, Array<Any>::class.java)
+        val searchPostResult = objectMapper.readValue(response.contentAsString, SearchPostResultDto::class.java)
 
-        assertEquals(pageSize, postList.size)
+        assertEquals(pageSize, searchPostResult.posts.size)
     }
 
     @Test
@@ -67,7 +68,8 @@ class PostsControllerTest {
             .andReturn()
             .response
 
-        val postList = objectMapper.readValue(response.contentAsString, Array<PostInfoResponseDto>::class.java)
+        val result = objectMapper.readValue(response.contentAsString, SearchPostResultDto::class.java)
+        val postList = result.posts
 
         println(postList.map { it.tags })
         println(postList.map { it.tags.contains(tag) })

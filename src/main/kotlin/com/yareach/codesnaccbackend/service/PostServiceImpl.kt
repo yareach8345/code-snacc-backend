@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
+import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
@@ -21,15 +22,25 @@ class PostServiceImpl(
     val userRepository: UserRepository,
     val tagRepository: TagRepository
 ): PostService {
-    override fun getNPosts(n: Int, page: Int, userId: String?, searchDto: PostSearchDto?): List<PostInfoResponseDto> =
-        postRepository
-            .searchBy(
+    override fun searchPosts(pageSize: Int, page: Int, userId: String?, searchDto: PostSearchDto?): SearchPostResultDto = SearchPostResultDto(
+        posts = postRepository
+            .findPostsBySearchCondition(
                 title = searchDto?.title,
                 userId = searchDto?.writerId,
                 tags = searchDto?.tags ?: emptySet(),
                 language = searchDto?.language,
-                pageable = PageRequest.of(page, n, Sort.by("writtenAt").descending())
-            ).map { it.toDto(userId) }
+                pageable = PageRequest.of(page, pageSize, Sort.by("writtenAt").descending())
+            ).map { it.toDto(userId) },
+        numberOfPosts = postRepository
+            .countBySearchCondition(
+                title=searchDto?.title,
+                userId = searchDto?.writerId,
+                tags = searchDto?.tags ?: emptySet(),
+                language = searchDto?.language,
+            ),
+        pageNumber = page,
+        pageSize = pageSize
+    )
 
     override fun getPostById(
         id: Int,

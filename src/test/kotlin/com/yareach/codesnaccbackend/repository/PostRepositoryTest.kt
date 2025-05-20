@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.jdbc.Sql
 import java.time.LocalDate
 import kotlin.test.assertNotNull
@@ -24,6 +25,7 @@ import kotlin.test.assertTrue
     "classpath:db/scripts/init-posts.sql",
     "classpath:db/scripts/init-comments.sql"
 ])
+@ActiveProfiles("test")
 @Transactional
 class PostRepositoryTest {
     @Autowired
@@ -178,67 +180,74 @@ class PostRepositoryTest {
 
     @Test
     @DisplayName("search by 테스트 1 - 별다른 조건이 없을 때 모든 게시글 반환")
-    fun searchBy() {
+    fun findPostsBySearchCondition() {
         val countOfAllOfPosts = postRepository.countByDeletedIsFalse()
-        val searchResult = postRepository.searchBy()
+        val searchResult = postRepository.findPostsBySearchCondition()
+        val numberOfPost = postRepository.countBySearchCondition()
 
-        assertEquals(countOfAllOfPosts, searchResult.size)
+        println(searchResult)
+        assertEquals(countOfAllOfPosts, numberOfPost)
+        assertEquals(4, searchResult.size)
         assertEquals(searchResult.sortedByDescending { it.writtenAt }, searchResult)
     }
 
     @Test
     @DisplayName("search by 테스트 2 - pageable")
-    fun searchByWithPaging() {
+    fun findPostsBySearchConditionWithPaging() {
+        val countOfAllOfPosts = postRepository.countByDeletedIsFalse()
         val pageable = PageRequest.of(0, 3, Sort.by("writtenAt").descending())
-        val searchResult = postRepository.searchBy(pageable = pageable)
 
+        val searchResult = postRepository.findPostsBySearchCondition(pageable = pageable)
+        val numberOfPost = postRepository.countBySearchCondition()
+
+        assertEquals(countOfAllOfPosts, numberOfPost)
         assertEquals(3, searchResult.size)
     }
 
     @Test
     @DisplayName("search by 테스트 3 - title")
-    fun searchByWithTitle() {
-        val searchResult = postRepository.searchBy(title = "test-post1")
+    fun findPostsBySearchConditionWithTitle() {
+        val searchResult = postRepository.findPostsBySearchCondition(title = "test-post1")
 
         assertTrue(searchResult.all { it.title == "test-post1" })
     }
 
     @Test
     @DisplayName("search by 테스트 4 - tag (단일)")
-    fun searchByWithTag() {
-        val searchResult = postRepository.searchBy(tags = listOf("test-tag1"))
+    fun findPostsBySearchConditionWithTag() {
+        val searchResult = postRepository.findPostsBySearchCondition(tags = listOf("test-tag1"))
 
         assertTrue( searchResult.all { it.tags.map{ it.tag }.contains("test-tag1") })
     }
 
     @Test
     @DisplayName("search by 테스트 4 - tag (복수)")
-    fun searchByWithPloralTag() {
-        val searchResult = postRepository.searchBy(tags = listOf("test-tag1", "test-tag2"))
+    fun findPostsBySearchConditionWithPloralTag() {
+        val searchResult = postRepository.findPostsBySearchCondition(tags = listOf("test-tag1", "test-tag2"))
 
         assertTrue(searchResult.all { it.tags.map{ it.tag }.let{ it.contains("test-tag1") && it.contains("test-tag2") } })
     }
 
     @Test
     @DisplayName("search by 테스트 5 - userId")
-    fun searchByWithUserId() {
-        val searchResult = postRepository.searchBy(userId = "test-user1")
+    fun findPostsBySearchConditionWithUserId() {
+        val searchResult = postRepository.findPostsBySearchCondition(userId = "test-user1")
 
         assertTrue(searchResult.all { it.writer.id == "test-user1" })
     }
 
     @Test
     @DisplayName("search by 테스트 6 - language")
-    fun searchByWithLanguage() {
-        val searchResult = postRepository.searchBy(language = "<LANG>")
+    fun findPostsBySearchConditionWithLanguage() {
+        val searchResult = postRepository.findPostsBySearchCondition(language = "<LANG>")
 
         assertTrue(searchResult.all { it.language == "<LANG>" })
     }
 
     @Test
     @DisplayName("search by 테스트 7 - 복합")
-    fun searchByWithCode() {
-        val searchResult = postRepository.searchBy(
+    fun findPostsBySearchConditionWithCode() {
+        val searchResult = postRepository.findPostsBySearchCondition(
             userId = "test-user1",
             title = "test-post",
             tags = listOf("test-tag1", "test-tag2"),
@@ -255,5 +264,12 @@ class PostRepositoryTest {
         assertTrue {
             searchResult.all { it.tags.map{ it.tag }.let{ it.contains("test-tag1") && it.contains("test-tag2") } }
         }
+    }
+
+    @Test
+    @DisplayName("갯수 가져오기")
+    fun countBySearchCondition() {
+        val count = postRepository.countBySearchCondition()
+        assertEquals(4, count)
     }
 }
