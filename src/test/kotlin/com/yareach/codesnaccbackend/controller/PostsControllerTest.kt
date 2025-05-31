@@ -1,9 +1,11 @@
 package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
+import com.yareach.codesnaccbackend.dto.post.PostUploadResponseDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
+import com.yareach.codesnaccbackend.repository.PostRepository
+import com.yareach.codesnaccbackend.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Assertions.*
@@ -35,6 +37,12 @@ class PostsControllerTest {
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var postRepository: PostRepository
+
+    @Autowired
+    lateinit var userRepository: UserRepository
 
     @Test
     @DisplayName("N개의 post 조회 테스트")
@@ -162,6 +170,66 @@ class PostsControllerTest {
             .andExpect(status().isCreated)
             .andExpect(header().exists("Location"))
             .andExpect(header().string("Location", Matchers.startsWith("/posts/")))
+            .andReturn()
+            .response
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 테스트")
+    @WithMockUser(username = "test-user1")
+    fun deletePost() {
+        val postDto = PostUploadDto(
+            writerId = "test-user1",
+            title = "delete-test",
+            code = "test-code",
+            language = "test-language",
+            content = "test-content",
+            tags = listOf("test-tag1", "test-tag2")
+        )
+
+        val postResponse = mockMvc.perform(
+            post("/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postDto)))
+            .andExpect { status().isCreated }
+            .andReturn()
+            .response
+
+        val postUploadResult = objectMapper.readValue(postResponse.contentAsString, PostUploadResponseDto::class.java)
+
+        mockMvc.perform( get("/posts/${postUploadResult.postId}") )
+            .andExpect { status().isOk }
+            .andExpect { jsonPath("$").isNotEmpty }
+            .andExpect { jsonPath("$.id").value(postUploadResult.postId) }
+            .andReturn()
+            .response
+
+        mockMvc.perform( delete("/posts/${postUploadResult.postId}") )
+            .andExpect { status().isOk }
+            .andReturn()
+            .response
+
+        mockMvc.perform( get("/posts/${postUploadResult.postId}") )
+            .andExpect { status().isNotFound }
+            .andReturn()
+            .response
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 테스트")
+    @WithMockUser(username = "test-user1")
+    fun deletePostWithWrongId() {
+        mockMvc.perform( get("/posts/2") )
+            .andExpect { status().isOk }
+            .andExpect { jsonPath("$").isNotEmpty }
+            .andExpect { jsonPath("$.writer.id").value("test-user2") }
+            .andReturn()
+            .response
+            .contentAsString
+            .let { println(it) }
+
+        mockMvc.perform( delete("/posts/2") )
+            .andExpect { status().isForbidden }
             .andReturn()
             .response
     }

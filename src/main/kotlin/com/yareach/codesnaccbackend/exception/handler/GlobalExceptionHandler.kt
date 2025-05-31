@@ -5,6 +5,7 @@ import com.yareach.codesnaccbackend.exception.AccessDeniedException
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
+import com.yareach.codesnaccbackend.exception.ResourceOwnershipException
 import com.yareach.codesnaccbackend.exception.SearchValueIsEmptyException
 import com.yareach.codesnaccbackend.exception.TagNotFoundException
 import com.yareach.codesnaccbackend.exception.UserIdDuplicateException
@@ -94,5 +95,12 @@ class GlobalExceptionHandler {
     fun handleAccessDeniedException(ex: AccessDeniedException): ErrorResponse = ErrorResponse(
         code = "ACCESS_DENIED",
         message = ex.message ?: "접근이 거부되었습니다."
+    )
+
+    @ExceptionHandler(ResourceOwnershipException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleResourceOwnershipException(ex: ResourceOwnershipException): ErrorResponse = ErrorResponse(
+        code = "RESOURCE_OWNERSHIP",
+        message = ex.message ?: "해당 자원에 접근할 수 없습니다."
     )
 }

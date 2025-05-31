@@ -6,6 +6,7 @@ import com.yareach.codesnaccbackend.entity.TagEntity
 import com.yareach.codesnaccbackend.entity.UserEntity
 import com.yareach.codesnaccbackend.entity.UserRole
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
+import com.yareach.codesnaccbackend.exception.ResourceOwnershipException
 import com.yareach.codesnaccbackend.extensions.findOrThrow
 import com.yareach.codesnaccbackend.repository.PostRepository
 import com.yareach.codesnaccbackend.repository.TagRepository
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -237,5 +239,59 @@ class PostServiceImplTest {
         assertTrue { capturePost.captured.tags.map { it.tag }.let{
             "test-tag1" in it && "test-tag2" in it
         }}
+    }
+
+    @Test
+    @DisplayName("post 삭제 테스트")
+    fun deletePost() {
+        val capturePostId = slot<Int>()
+
+        every { postRepository.findByIdOrNull(1)  }.returns(
+            PostEntity(
+                id = 1,
+                writer = UserEntity(
+                    id = "testuser",
+                    password = "<PASSWORD>",
+                    role = UserRole.USER,
+                ),
+                title = "<TITLE>",
+                code = "<CODE>",
+                language = "<LANGUAGE>",
+                content = "<CONTENT>",
+                tags = mutableSetOf(),
+            )
+        )
+
+        every { postRepository.deleteById(capture(capturePostId)) }.returns(Unit)
+
+        postService.deletePost(1, "testuser")
+
+        assertEquals(1, capturePostId.captured)
+    }
+
+    @Test
+    @DisplayName("다른 사람의 ID로 삭제불가")
+    fun deletePostWithWrongId() {
+        val capturePostId = slot<Int>()
+
+        every { postRepository.findByIdOrNull(1)  }.returns(
+            PostEntity(
+                id = 1,
+                writer = UserEntity(
+                    id = "testuser",
+                    password = "<PASSWORD>",
+                    role = UserRole.USER,
+                ),
+                title = "<TITLE>",
+                code = "<CODE>",
+                language = "<LANGUAGE>",
+                content = "<CONTENT>",
+                tags = mutableSetOf(),
+            )
+        )
+
+        every { postRepository.deleteById(capture(capturePostId)) }.returns(Unit)
+
+        assertThrows(ResourceOwnershipException::class.java){ postService.deletePost(1, "aWrongId") }
     }
 }

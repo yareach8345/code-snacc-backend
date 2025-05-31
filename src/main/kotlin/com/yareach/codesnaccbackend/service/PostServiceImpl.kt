@@ -5,12 +5,15 @@ import com.yareach.codesnaccbackend.dto.post.PostSearchDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.entity.PostEntity
+import com.yareach.codesnaccbackend.exception.PostNotFoundException
+import com.yareach.codesnaccbackend.exception.ResourceOwnershipException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
 import com.yareach.codesnaccbackend.extensions.findOrThrow
 import com.yareach.codesnaccbackend.extensions.toDto
 import com.yareach.codesnaccbackend.repository.PostRepository
 import com.yareach.codesnaccbackend.repository.TagRepository
 import com.yareach.codesnaccbackend.repository.UserRepository
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.data.domain.Sort
@@ -82,5 +85,17 @@ class PostServiceImpl(
         val uploadedPost = postRepository.save(postEntity)
 
         return uploadedPost.id!!
+    }
+
+    @Transactional
+    override fun deletePost(postId: Int, userId: String?) {
+        val post = postRepository.findOrThrow(postId) { PostNotFoundException(postId) }
+        if(post.writer.id == userId) {
+            postRepository.deleteById(postId)
+        } else {
+            throw ResourceOwnershipException(
+                message = "유저 아이디 ${userId}와 $postId 게시글의 작성자 정보가 일치하지 않습니다."
+            )
+        }
     }
 }

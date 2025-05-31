@@ -13,6 +13,7 @@ import com.yareach.codesnaccbackend.service.PostService
 import com.yareach.codesnaccbackend.util.getUserId
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -90,5 +91,12 @@ class PostsController(
         logger.info("post가 업로드 되었습니다. ${postUploadDto.title}($savedPostId) by ${postUploadDto.writerId}")
 
         return ResponseEntity.created(URI.create("/posts/$savedPostId")).body(PostUploadResponseDto(savedPostId))
+    }
+
+    @DeleteMapping("/{postId}")
+    fun deletePost(@PathVariable postId: Int): ResponseEntity<Unit> {
+        val userId = getUserId(SecurityContextHolder.getContext().authentication)
+        postService.deletePost(postId, userId)
+        return ResponseEntity.ok().build()
     }
 }

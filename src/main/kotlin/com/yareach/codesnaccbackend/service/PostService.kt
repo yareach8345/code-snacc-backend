@@ -17,4 +17,6 @@ interface PostService {
     fun getNRandomPost(exclude: Iterable<Int>? = null, n: Int = 1, userId: String? = null): List<PostInfoResponseDto>
 
     fun uploadPost(postUploadDto: PostUploadDto): Int
+
+    fun deletePost(postId: Int, userId: String? = null)
 }
