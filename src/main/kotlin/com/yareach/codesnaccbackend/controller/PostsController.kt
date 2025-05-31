@@ -4,9 +4,11 @@ import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
+import com.yareach.codesnaccbackend.dto.post.PostUploadResponseDto
 import com.yareach.codesnaccbackend.exception.AccessDeniedException
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
+import com.yareach.codesnaccbackend.extensions.logger
 import com.yareach.codesnaccbackend.service.PostService
 import com.yareach.codesnaccbackend.util.getUserId
 import org.springframework.http.ResponseEntity
@@ -25,6 +27,8 @@ import java.net.URI
 class PostsController(
     private val postService: PostService
 ) {
+    val logger = logger()
+
     @GetMapping
     fun getNPosts(
         @RequestParam title: String?,
@@ -77,13 +81,14 @@ class PostsController(
     }
 
     @PostMapping
-    fun uploadPost(@RequestBody postUploadDto: PostUploadDto): ResponseEntity<Unit> {
+    fun uploadPost(@RequestBody postUploadDto: PostUploadDto): ResponseEntity<PostUploadResponseDto> {
         val userId = getUserId(SecurityContextHolder.getContext().authentication)
 
         if(userId != postUploadDto.writerId) throw AccessDeniedException("작성자는 현재 로그인한 사용자여야 합니다.")
 
         val savedPostId = postService.uploadPost(postUploadDto)
+        logger.info("post가 업로드 되었습니다. ${postUploadDto.title}($savedPostId) by ${postUploadDto.writerId}")
 
-        return ResponseEntity.created(URI.create("/posts/$savedPostId")).build()
+        return ResponseEntity.created(URI.create("/posts/$savedPostId")).body(PostUploadResponseDto(savedPostId))
     }
 }
