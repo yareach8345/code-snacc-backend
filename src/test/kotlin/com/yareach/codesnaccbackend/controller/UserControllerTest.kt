@@ -1,8 +1,6 @@
 package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.yareach.codesnaccbackend.dto.user.UpdateField
-import com.yareach.codesnaccbackend.dto.user.UserInfoUpdateDto
 import com.yareach.codesnaccbackend.dto.user.UserJoinDto
 import com.yareach.codesnaccbackend.repository.UserRepository
 import jakarta.transaction.Transactional
@@ -13,14 +11,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath

@@ -26,6 +26,7 @@ class SecurityConfig(
                 .requestMatchers("/me/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/posts/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE , "/posts/**").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/posts/**").authenticated()
                 .anyRequest().permitAll()}
             .formLogin { it
                 .loginProcessingUrl("/auth/login")

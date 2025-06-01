@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
+import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.entity.PostEntity
@@ -92,6 +93,25 @@ class PostServiceImpl(
         val post = postRepository.findOrThrow(postId) { PostNotFoundException(postId) }
         if(post.writer.id == userId) {
             postRepository.deleteById(postId)
+        } else {
+            throw ResourceOwnershipException(
+                message = "유저 아이디 ${userId}와 $postId 게시글의 작성자 정보가 일치하지 않습니다."
+            )
+        }
+    }
+
+    @Transactional
+    override fun updatePost(postId: Int, postUpdateDto: PostUpdateDto, userId: String?) {
+        val post = postRepository.findOrThrow(postId) { PostNotFoundException(postId) }
+        if(post.writer.id == userId) {
+            val tagEntities = tagRepository.findByTagIn(postUpdateDto.tags)
+            post.let {
+                it.title = postUpdateDto.title
+                it.code = postUpdateDto.code
+                it.language = postUpdateDto.language
+                it.content = postUpdateDto.content
+                it.tags = tagEntities
+            }
         } else {
             throw ResourceOwnershipException(
                 message = "유저 아이디 ${userId}와 $postId 게시글의 작성자 정보가 일치하지 않습니다."

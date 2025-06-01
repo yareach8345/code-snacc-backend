@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
+import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 
@@ -19,4 +20,6 @@ interface PostService {
     fun uploadPost(postUploadDto: PostUploadDto): Int
 
     fun deletePost(postId: Int, userId: String? = null)
+
+    fun updatePost(postId: Int, postUpdateDto: PostUpdateDto, userId: String? = null)
 }

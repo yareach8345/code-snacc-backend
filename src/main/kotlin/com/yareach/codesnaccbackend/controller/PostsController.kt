@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.controller
 
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
+import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadResponseDto
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -91,6 +93,13 @@ class PostsController(
         logger.info("post가 업로드 되었습니다. ${postUploadDto.title}($savedPostId) by ${postUploadDto.writerId}")
 
         return ResponseEntity.created(URI.create("/posts/$savedPostId")).body(PostUploadResponseDto(savedPostId))
+    }
+
+    @PatchMapping("/{postId}")
+    fun updatePost(@PathVariable postId: Int, @RequestBody postUpdateDto: PostUpdateDto): ResponseEntity<Unit> {
+        val userId = getUserId(SecurityContextHolder.getContext().authentication)
+        postService.updatePost(postId, postUpdateDto, userId)
+        return ResponseEntity.ok().build()
     }
 
     @DeleteMapping("/{postId}")

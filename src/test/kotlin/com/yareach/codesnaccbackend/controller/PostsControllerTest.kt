@@ -1,11 +1,11 @@
 package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
+import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadResponseDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
-import com.yareach.codesnaccbackend.repository.PostRepository
-import com.yareach.codesnaccbackend.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Assertions.*
@@ -37,12 +37,6 @@ class PostsControllerTest {
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
-
-    @Autowired
-    lateinit var postRepository: PostRepository
-
-    @Autowired
-    lateinit var userRepository: UserRepository
 
     @Test
     @DisplayName("N개의 post 조회 테스트")
@@ -90,7 +84,7 @@ class PostsControllerTest {
     @Test
     @DisplayName("게시글 id로 조회 테스트")
     fun getPostById() {
-        val postId = 1
+        val postId = 100
 
         mockMvc.perform( get("/posts/$postId") )
             .andExpect { status().isOk }
@@ -232,5 +226,66 @@ class PostsControllerTest {
             .andExpect { status().isForbidden }
             .andReturn()
             .response
+    }
+
+    @Test
+    @DisplayName("게시글 수정 테스트")
+    @WithMockUser(username = "test-user1")
+    fun updatePost() {
+        val postDto = PostUploadDto(
+            writerId = "test-user1",
+            title = "delete-test",
+            code = "test-code",
+            language = "test-language",
+            content = "test-content",
+            tags = listOf("test-tag1", "test-tag2")
+        )
+
+        val postResponse = mockMvc.perform(
+            post("/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postDto)))
+            .andExpect { status().isCreated }
+            .andReturn()
+            .response
+
+        val postUploadResult = objectMapper.readValue(postResponse.contentAsString, PostUploadResponseDto::class.java)
+
+        mockMvc.perform( get("/posts/${postUploadResult.postId}") )
+            .andExpect { status().isOk }
+            .andExpect { jsonPath("$").isNotEmpty }
+            .andExpect { jsonPath("$.id").value(postUploadResult.postId) }
+            .andReturn()
+            .response
+
+        val updateDto = PostUpdateDto(
+            title = "update-title",
+            code = "update-code",
+            language = "update-language",
+            content = "update-content",
+            tags = listOf("test-tag3")
+        )
+
+        mockMvc.perform(
+            patch("/posts/${postUploadResult.postId}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
+            .andExpect { status().isOk }
+            .andReturn()
+            .response
+
+        val responseAfterUpdate = mockMvc.perform( get("/posts/${postUploadResult.postId}") )
+            .andExpect { status().isOk }
+            .andExpect { jsonPath("$").isNotEmpty }
+            .andExpect { jsonPath("$.title").value("update-title") }
+            .andExpect { jsonPath("$.code").value("update-code") }
+            .andExpect { jsonPath("$.language").value("update-language") }
+            .andExpect { jsonPath("$.content").value("update-content") }
+            .andReturn()
+            .response
+
+        val postInfoAfterUpdate = objectMapper.readValue(responseAfterUpdate.contentAsString, PostInfoResponseDto::class.java)
+
+        assertEquals(postInfoAfterUpdate.tags.toSet(), setOf("test-tag3"))
     }
 }
