@@ -32,7 +32,6 @@ class SecurityConfig(
                 .permitAll() }
             .rememberMe { it
                 .rememberMeParameter("rememberMe")
-                .alwaysRemember(true)
                 .tokenValiditySeconds(60 * 60 * 24 * 7)
                 .userDetailsService(userDetailsService)
             }
