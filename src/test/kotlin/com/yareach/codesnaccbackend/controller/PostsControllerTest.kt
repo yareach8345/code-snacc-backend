@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc
 import kotlin.test.Test
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import kotlin.jvm.java
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,9 +47,8 @@ class PostsControllerTest {
         val pageNumber = 1
 
         val response = mockMvc.perform( get("/posts?pageSize=$pageSize&page=$pageNumber") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isArray }
-            .andExpect { jsonPath("$") }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$.posts").isArray )
             .andReturn()
             .response
 
@@ -65,9 +65,8 @@ class PostsControllerTest {
         val pageNumber = 0
 
         val response = mockMvc.perform( get("/posts?pageSize=$pageSize&pageNumber=$pageNumber&tags=$tag") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isArray }
-            .andExpect { jsonPath("$") }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$.posts").isArray )
             .andReturn()
             .response
 
@@ -85,13 +84,13 @@ class PostsControllerTest {
     @Test
     @DisplayName("게시글 id로 조회 테스트")
     fun getPostById() {
-        val postId = 100
+        val postId = 1
 
         mockMvc.perform( get("/posts/$postId") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$").isMap }
-            .andExpect { jsonPath("$.id").value(postId) }
+            .andExpect( status().isOk)
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$").isMap )
+            .andExpect( jsonPath("$.id").value(postId) )
             .andReturn()
             .response
     }
@@ -100,25 +99,25 @@ class PostsControllerTest {
     @DisplayName("내가 추천한 게시글은 didIRecommend 필드가 true 변경된다")
     @WithMockUser(username = "test-user1")
     fun getPostByIdNotFound() {
-        val postId1 = 1
+        val postId1 = 0
 
         mockMvc.perform( get("/posts/${postId1}") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$").isMap }
-            .andExpect { jsonPath("$.id").value(postId1) }
-            .andExpect { jsonPath("$.didIRecommend").value(true) }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$").isMap )
+            .andExpect( jsonPath("$.id").value(postId1) )
+            .andExpect( jsonPath("$.didIRecommend").value(true) )
             .andReturn()
             .response
 
-        val postId2 = 2
+        val postId2 = 1
 
         mockMvc.perform( get("/posts/$postId2") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$").isMap }
-            .andExpect { jsonPath("$.id").value(postId2) }
-            .andExpect { jsonPath("$.didIRecommend").value(true) }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$").isMap )
+            .andExpect( jsonPath("$.id").value(postId2) )
+            .andExpect( jsonPath("$.didIRecommend").value(false) )
             .andReturn()
             .response
     }
@@ -127,20 +126,21 @@ class PostsControllerTest {
     @DisplayName("랜덤으로 게시글 조회 테스트")
     fun getRandomPost() {
         mockMvc.perform( get("/posts/random") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$").isMap }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$").isArray )
             .andReturn()
             .response
+            .let { objectMapper.readValue(it.contentAsString, Array<PostInfoResponseDto>::class.java) }
+            .toList()
     }
 
     @Test
     @DisplayName("게시글로 댓글 조회")
     fun getCommentCnt() {
-        mockMvc.perform( get("/posts/1") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isArray }
-            .andExpect { jsonPath("$.commentCnt").value(3) }
+        mockMvc.perform( get("/posts/0") )
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$.commentCnt").value(3) )
             .andReturn()
             .response
     }
@@ -186,26 +186,26 @@ class PostsControllerTest {
             post("/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(postDto)))
-            .andExpect { status().isCreated }
+            .andExpect( status().isCreated )
             .andReturn()
             .response
 
         val postUploadResult = objectMapper.readValue(postResponse.contentAsString, PostUploadResponseDto::class.java)
 
         mockMvc.perform( get("/posts/${postUploadResult.postId}") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$.id").value(postUploadResult.postId) }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$.id").value(postUploadResult.postId) )
             .andReturn()
             .response
 
         mockMvc.perform( delete("/posts/${postUploadResult.postId}") )
-            .andExpect { status().isOk }
+            .andExpect( status().isOk )
             .andReturn()
             .response
 
         mockMvc.perform( get("/posts/${postUploadResult.postId}") )
-            .andExpect { status().isNotFound }
+            .andExpect( status().isNotFound )
             .andReturn()
             .response
     }
@@ -215,16 +215,16 @@ class PostsControllerTest {
     @WithMockUser(username = "test-user1")
     fun deletePostWithWrongId() {
         mockMvc.perform( get("/posts/2") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$.writer.id").value("test-user2") }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$.writer.id").value("test-user2") )
             .andReturn()
             .response
             .contentAsString
             .let { println(it) }
 
         mockMvc.perform( delete("/posts/2") )
-            .andExpect { status().isForbidden }
+            .andExpect( status().isForbidden )
             .andReturn()
             .response
     }
@@ -246,16 +246,16 @@ class PostsControllerTest {
             post("/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(postDto)))
-            .andExpect { status().isCreated }
+            .andExpect( status().isCreated )
             .andReturn()
             .response
 
         val postUploadResult = objectMapper.readValue(postResponse.contentAsString, PostUploadResponseDto::class.java)
 
         mockMvc.perform( get("/posts/${postUploadResult.postId}") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$.id").value(postUploadResult.postId) }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$.id").value(postUploadResult.postId) )
             .andReturn()
             .response
 
@@ -271,17 +271,17 @@ class PostsControllerTest {
             patch("/posts/${postUploadResult.postId}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDto)))
-            .andExpect { status().isOk }
+            .andExpect( status().isOk )
             .andReturn()
             .response
 
         val responseAfterUpdate = mockMvc.perform( get("/posts/${postUploadResult.postId}") )
-            .andExpect { status().isOk }
-            .andExpect { jsonPath("$").isNotEmpty }
-            .andExpect { jsonPath("$.title").value("update-title") }
-            .andExpect { jsonPath("$.code").value("update-code") }
-            .andExpect { jsonPath("$.language").value("update-language") }
-            .andExpect { jsonPath("$.content").value("update-content") }
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$.title").value("update-title") )
+            .andExpect( jsonPath("$.code").value("update-code") )
+            .andExpect( jsonPath("$.language").value("update-language") )
+            .andExpect( jsonPath("$.content").value("update-content") )
             .andReturn()
             .response
 
