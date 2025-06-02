@@ -1,6 +1,7 @@
 package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.yareach.codesnaccbackend.dto.comment.CommentDto
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
@@ -287,5 +288,20 @@ class PostsControllerTest {
         val postInfoAfterUpdate = objectMapper.readValue(responseAfterUpdate.contentAsString, PostInfoResponseDto::class.java)
 
         assertEquals(postInfoAfterUpdate.tags.toSet(), setOf("test-tag3"))
+    }
+
+    @Test
+    @DisplayName("게시글의 댓글 얻어오기")
+    fun getPostsComments() {
+        val response = mockMvc.perform( get("/posts/0/comments") )
+            .andExpect( status().isOk() )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$").isArray )
+            .andReturn()
+            .response
+            .let{ objectMapper.readValue(it.contentAsString, Array<CommentDto>::class.java) }
+            .toList()
+
+        assertEquals(3, response.size)
     }
 }
