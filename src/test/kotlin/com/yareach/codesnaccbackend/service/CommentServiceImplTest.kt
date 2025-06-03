@@ -1,6 +1,7 @@
 package com.yareach.codesnaccbackend.service
 
-import com.yareach.codesnaccbackend.dto.comment.PostCommentDto
+import com.yareach.codesnaccbackend.dto.comment.CommentPostDto
+import com.yareach.codesnaccbackend.dto.comment.CommentUpdateDto
 import com.yareach.codesnaccbackend.entity.CommentEntity
 import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.entity.UserEntity
@@ -67,7 +68,7 @@ class CommentServiceImplTest {
     )
 
     val newCommentId = 11223344
-    val newCommentDto = PostCommentDto(
+    val newCommentDto = CommentPostDto(
         content = "<TEST COMMENT>"
     )
 
@@ -184,6 +185,37 @@ class CommentServiceImplTest {
 
         assertThrows(CommentNotFoundException::class.java) {
             commentService.getComment(mockCommentId)
+        }
+    }
+
+    @Test
+    @DisplayName("댓글 수정")
+    fun updateComment() {
+        every { commentRepository.findByIdOrNull(mockCommentId) } returns mockCommentEntity
+
+        assertEquals("<CONTENT>", mockCommentEntity.content)
+        commentService.updateComment(mockCommentId, mockUserId, CommentUpdateDto( content = "<UPDATED CONTENT>" ))
+
+        assertEquals("<UPDATED CONTENT>", mockCommentEntity.content)
+    }
+
+    @Test
+    @DisplayName("댓글 수정(댓글 없어 실패)")
+    fun tryUpdateCommentButTheCommentIsNotExists() {
+        every { commentRepository.findByIdOrNull(mockCommentId) } returns null
+
+        assertThrows(CommentNotFoundException::class.java) {
+            commentService.updateComment(mockCommentId, mockUserId, CommentUpdateDto( content = "<UPDATED CONTENT>" ))
+        }
+    }
+
+    @Test
+    @DisplayName("댓글 수정(유저가 쓴 댓글이 아니라 실패)")
+    fun tryUpdateCommentButTheCommentIsNotMine() {
+        every { commentRepository.findByIdOrNull(mockCommentId) } returns mockCommentEntity
+
+        assertThrows(ResourceOwnershipException::class.java) {
+            commentService.updateComment(mockCommentId, "other-user", CommentUpdateDto( content = "<UPDATED CONTENT>" ))
         }
     }
 }

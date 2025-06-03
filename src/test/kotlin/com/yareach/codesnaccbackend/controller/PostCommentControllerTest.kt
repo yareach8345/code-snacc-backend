@@ -2,7 +2,7 @@ package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yareach.codesnaccbackend.dto.comment.CommentDto
-import com.yareach.codesnaccbackend.dto.comment.PostCommentDto
+import com.yareach.codesnaccbackend.dto.comment.CommentPostDto
 import jakarta.transaction.Transactional
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,13 +65,13 @@ class PostCommentControllerTest {
     @DisplayName("댓글 올리기 성공")
     @WithMockUser(username = "test-user1")
     fun postComment() {
-        val postCommentDto = PostCommentDto(
+        val commentPostDto = CommentPostDto(
             content = "<NEWCOMMENT>"
         )
         mockMvc.perform(
             post("/posts/0/comments")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(postCommentDto)))
+                .content(objectMapper.writeValueAsString(commentPostDto)))
             .andExpect( status().isCreated )
             .andExpect(header().exists("Location"))
             .andExpect(header().string("Location", Matchers.startsWith("/comments/")))
@@ -81,13 +81,13 @@ class PostCommentControllerTest {
     @DisplayName("유저가 존재하지 않을 경우 댓글 올리기 실패")
     @WithMockUser(username = "unknown-user")
     fun tryPostCommentButUserNotFound() {
-        val postCommentDto = PostCommentDto(
+        val commentPostDto = CommentPostDto(
             content = "<NEWCOMMENT>"
         )
         mockMvc.perform(
             post("/posts/0/comments")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(postCommentDto)))
+                .content(objectMapper.writeValueAsString(commentPostDto)))
             .andExpect( status().isNotFound )
             .andExpect( jsonPath("$").isNotEmpty )
             .andExpect( jsonPath("$.code").value("USER_NOT_FOUND") )
@@ -97,14 +97,14 @@ class PostCommentControllerTest {
     @DisplayName("게시글이 존재하지 않을 경우 댓글 올리기 실패")
     @WithMockUser(username = "test-user1")
     fun tryPostCommentButPostNotFound() {
-        val postCommentDto = PostCommentDto(
+        val commentPostDto = CommentPostDto(
             content = "<NEWCOMMENT>"
         )
         val postId = 100
         mockMvc.perform(
             post("/posts/${postId}/comments")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(postCommentDto)))
+                .content(objectMapper.writeValueAsString(commentPostDto)))
             .andExpect( status().isNotFound )
             .andExpect( jsonPath("$").isNotEmpty )
             .andExpect( jsonPath("$.code").value("POST_NOT_FOUND") )

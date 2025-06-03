@@ -1,7 +1,7 @@
 package com.yareach.codesnaccbackend.controller
 
 import com.yareach.codesnaccbackend.dto.comment.CommentDto
-import com.yareach.codesnaccbackend.dto.comment.PostCommentDto
+import com.yareach.codesnaccbackend.dto.comment.CommentPostDto
 import com.yareach.codesnaccbackend.exception.AccessDeniedException
 import com.yareach.codesnaccbackend.service.CommentService
 import com.yareach.codesnaccbackend.util.getUserId
@@ -26,9 +26,9 @@ class PostCommentController(
     }
 
     @PostMapping
-    fun postComment(@PathVariable postId: Int, @RequestBody postCommentDto: PostCommentDto): ResponseEntity<Unit> {
+    fun postComment(@PathVariable postId: Int, @RequestBody commentPostDto: CommentPostDto): ResponseEntity<Unit> {
         val userId = getUserId(SecurityContextHolder.getContext().authentication) ?: throw AccessDeniedException("Not LoggedIn")
-        val commentId = commentService.postCommentByPostId(postId, userId, postCommentDto)
+        val commentId = commentService.postCommentByPostId(postId, userId, commentPostDto)
         return ResponseEntity.created(URI.create("/comments/${commentId}")).build()
     }
 }

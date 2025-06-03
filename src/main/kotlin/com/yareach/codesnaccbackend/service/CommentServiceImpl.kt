@@ -1,7 +1,8 @@
 package com.yareach.codesnaccbackend.service
 
 import com.yareach.codesnaccbackend.dto.comment.CommentDto
-import com.yareach.codesnaccbackend.dto.comment.PostCommentDto
+import com.yareach.codesnaccbackend.dto.comment.CommentPostDto
+import com.yareach.codesnaccbackend.dto.comment.CommentUpdateDto
 import com.yareach.codesnaccbackend.entity.CommentEntity
 import com.yareach.codesnaccbackend.exception.CommentNotFoundException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
@@ -36,7 +37,7 @@ class CommentServiceImpl(
     override fun postCommentByPostId(
         postId: Int,
         userId: String,
-        newCommentDto: PostCommentDto
+        newCommentDto: CommentPostDto
     ): Int {
         val userEntity = userRepository.findOrThrow(userId) { throw UserNotFoundException(userId) }
         val postEntity = postRepository.findOrThrow(postId) { throw PostNotFoundException(postId) }
@@ -62,5 +63,20 @@ class CommentServiceImpl(
 
     override fun getComment(commentId: Int): CommentDto {
         return commentRepository.findOrThrow(commentId) { throw CommentNotFoundException(commentId) }.toDto()
+    }
+
+    @Transactional
+    override fun updateComment(
+        commentId: Int,
+        userId: String,
+        commentUpdateDto: CommentUpdateDto
+    ) {
+        val comment = commentRepository.findOrThrow(commentId) { throw CommentNotFoundException(commentId) }
+
+        if (comment.writer.id != userId) {
+            throw ResourceOwnershipException("해당 댓글 수정 권한이 없습니다.")
+        }
+
+        comment.content = commentUpdateDto.content
     }
 }
