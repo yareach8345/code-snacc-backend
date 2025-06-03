@@ -16,16 +16,16 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/posts/{postId}/comments")
 class PostCommentController(
     val commentService: CommentService,
 ) {
-    @GetMapping("/{postId}/comments")
+    @GetMapping
     fun getComments(@PathVariable postId: Int): ResponseEntity<List<CommentDto>> {
         return ResponseEntity.ok(commentService.getCommentsByPostId(postId))
     }
 
-    @PostMapping("/{postId}/comments")
+    @PostMapping
     fun postComment(@PathVariable postId: Int, @RequestBody postCommentDto: PostCommentDto): ResponseEntity<Unit> {
         val userId = getUserId(SecurityContextHolder.getContext().authentication) ?: throw AccessDeniedException("Not LoggedIn")
         val commentId = commentService.postCommentByPostId(postId, userId, postCommentDto)

@@ -5,17 +5,22 @@ import com.yareach.codesnaccbackend.entity.CommentEntity
 import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.entity.UserEntity
 import com.yareach.codesnaccbackend.entity.UserRole
+import com.yareach.codesnaccbackend.exception.CommentNotFoundException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
+import com.yareach.codesnaccbackend.exception.ResourceOwnershipException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
 import com.yareach.codesnaccbackend.repository.CommentRepository
 import com.yareach.codesnaccbackend.repository.PostRepository
 import com.yareach.codesnaccbackend.repository.UserRepository
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.DisplayName
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,36 +35,48 @@ class CommentServiceImplTest {
         postRepository
     )
 
+    val mockUserId = "test-user1"
+
+    val mockUserEntity = UserEntity(
+        id = mockUserId,
+        password = "<PASSWORD>",
+        nickname = "<NICKNAME>",
+        role = UserRole.USER,
+    )
+
+    val mockPostId = 0
+
+    val mockPostEntity = PostEntity(
+        id = mockPostId,
+        writer = mockUserEntity,
+        title = "<TITLE>",
+        code = "<CODE>",
+        language = "<LANGUAGE>",
+        content = "<content>",
+        tags = mutableSetOf(),
+    )
+
+    val mockCommentId = 1313
+    val mockCommentEntity = CommentEntity(
+        id = mockCommentId,
+        content = "<CONTENT>",
+        post = mockPostEntity,
+        writer = mockUserEntity,
+        writtenAt = LocalDateTime.now(),
+        deleted = false
+    )
+
+    val newCommentId = 11223344
+    val newCommentDto = PostCommentDto(
+        content = "<TEST COMMENT>"
+    )
+
     @Test
     @DisplayName("성공적으로 댓글을 올림")
     fun postComments() {
-        val postId = 0
-        val userId = "test-user1"
-        val newCommentDto = PostCommentDto(
-            content = "<TEST COMMENT>"
-        )
-        val newCommentId = 11223344
+        every { userRepository.findByIdOrNull(mockUserId) } returns (mockUserEntity)
 
-        val mockUserEntity = UserEntity(
-            id = userId,
-            password = "<PASSWORD>",
-            nickname = "<NICKNAME>",
-            role = UserRole.USER,
-        )
-
-        val mockPostEntity = PostEntity(
-            id = postId,
-            writer = mockUserEntity,
-            title = "<TITLE>",
-            code = "<CODE>",
-            language = "<LANGUAGe>",
-            content = "<content>",
-            tags = mutableSetOf(),
-        )
-
-        every { userRepository.findByIdOrNull(userId) } returns (mockUserEntity)
-
-        every { postRepository.findByIdOrNull(postId) } returns (mockPostEntity)
+        every { postRepository.findByIdOrNull(mockPostId) } returns (mockPostEntity)
 
         val newCommentCaptor = slot<CommentEntity>()
 
@@ -70,7 +87,7 @@ class CommentServiceImplTest {
         }
 
         val idOfGeneratedComment = commentService.postCommentByPostId(
-            postId, userId, newCommentDto
+            mockPostId, mockUserId, newCommentDto
         )
 
         assertEquals(newCommentId, idOfGeneratedComment)
@@ -79,43 +96,70 @@ class CommentServiceImplTest {
     @Test
     @DisplayName("유저가 존재하지 않을 경우 실패함")
     fun failPostCommentCuzUserNotExists() {
-        val postId = 0
-        val userId = "test-user1"
-        val newCommentDto = PostCommentDto(
-            content = "<TEST COMMENT>"
-        )
-
-        every { userRepository.findByIdOrNull(userId) } returns (null)
+        every { userRepository.findByIdOrNull(mockUserId) } returns (null)
 
         assertThrows(UserNotFoundException::class.java) {
-            commentService.postCommentByPostId(postId, userId, newCommentDto)
+            commentService.postCommentByPostId(mockPostId, mockUserId, newCommentDto)
         }
     }
 
     @Test
     @DisplayName("개시글이 존재하지 않는경우 실패함")
     fun postCommentButPostIsNotExists() {
-        val postId = 0
-        val userId = "test-user1"
-        val newCommentDto = PostCommentDto(
-            content = "<TEST COMMENT>"
-        )
+        every { userRepository.findByIdOrNull(mockUserId) } returns (mockUserEntity)
 
-        val mockUserEntity = UserEntity(
-            id = userId,
+        every { postRepository.findByIdOrNull(mockPostId) } returns (null)
+
+        assertThrows(PostNotFoundException::class.java) {
+            commentService.postCommentByPostId(
+                mockPostId, mockUserId, newCommentDto
+            )
+        }
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 (성공하는 경우)")
+    fun deleteComment() {
+        val commentIdCapture = slot<Int>()
+        every { commentRepository.findByIdOrNull(mockCommentId) } returns mockCommentEntity
+        every { commentRepository.deleteById(capture(commentIdCapture)) } just runs
+
+        commentService.deleteComment(mockCommentId, mockUserId)
+
+        assertEquals(mockCommentId, commentIdCapture.captured)
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 (해당 댓글 존재하지 않아 실패)")
+    fun tryDeleteCommentButTheCommentIsNotExists() {
+        every { commentRepository.findByIdOrNull(mockCommentId) } returns null
+
+        assertThrows(CommentNotFoundException::class.java) {
+            commentService.deleteComment(mockCommentId, mockUserId)
+        }
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 (해당 댓글이 다른 유저의 소유라 실패)")
+    fun tryDeleteCommentButTheCommentsOwnerIsNotTestUser1() {
+        val mockTestUser2 = UserEntity(
+            id = "test-user2",
             password = "<PASSWORD>",
             nickname = "<NICKNAME>",
             role = UserRole.USER,
         )
+        val mockCommentOfTestUser2 = CommentEntity(
+            id = mockCommentId,
+            content = "<COMMENT>",
+            post = mockPostEntity,
+            writer = mockTestUser2,
+            writtenAt = LocalDateTime.now(),
+        )
 
-        every { userRepository.findByIdOrNull(userId) } returns (mockUserEntity)
+        every { commentRepository.findByIdOrNull(mockCommentId) } returns mockCommentOfTestUser2
 
-        every { postRepository.findByIdOrNull(postId) } returns (null)
-
-        assertThrows(PostNotFoundException::class.java) {
-            commentService.postCommentByPostId(
-                postId, userId, newCommentDto
-            )
+        assertThrows(ResourceOwnershipException::class.java) {
+            commentService.deleteComment(mockCommentId, mockUserId)
         }
     }
 }

@@ -3,7 +3,9 @@ package com.yareach.codesnaccbackend.service
 import com.yareach.codesnaccbackend.dto.comment.CommentDto
 import com.yareach.codesnaccbackend.dto.comment.PostCommentDto
 import com.yareach.codesnaccbackend.entity.CommentEntity
+import com.yareach.codesnaccbackend.exception.CommentNotFoundException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
+import com.yareach.codesnaccbackend.exception.ResourceOwnershipException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
 import com.yareach.codesnaccbackend.extensions.findOrThrow
 import com.yareach.codesnaccbackend.extensions.toDto
@@ -45,5 +47,16 @@ class CommentServiceImpl(
         )
         val comment = commentRepository.save(commentEntity)
         return comment.id!!
+    }
+
+    @Transactional
+    override fun deleteComment(commentId: Int, userId: String) {
+        val comment = commentRepository.findOrThrow(commentId) { throw CommentNotFoundException(commentId) }
+
+        if(comment.writer.id != userId) {
+            throw ResourceOwnershipException("해당 댓글에 접근할 수 없습니다.")
+        }
+
+        commentRepository.deleteById(commentId)
     }
 }
