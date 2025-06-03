@@ -6,4 +6,4 @@ VALUES
     (3, 0, '<TEST COMMENT1>', 'admin1', false),
     (4, 2, '<TEST COMMENT1>', 'admin1', false);
 
-ALTER TABLE posts ALTER COLUMN post_id RESTART WITH 5;
+ALTER TABLE comments ALTER COLUMN comment_id RESTART WITH 5;
