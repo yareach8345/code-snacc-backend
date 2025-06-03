@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
 import java.time.LocalDateTime
 
@@ -32,4 +33,11 @@ class CommentEntity (
     var writtenAt: LocalDateTime? = null,
 
     var deleted: Boolean = false,
-)
+) {
+    @PrePersist
+    fun initWrittenAtField() {
+        if(writtenAt == null) {
+            writtenAt = LocalDateTime.now()
+        }
+    }
+}

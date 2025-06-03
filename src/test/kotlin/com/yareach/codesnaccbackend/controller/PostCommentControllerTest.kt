@@ -2,17 +2,23 @@ package com.yareach.codesnaccbackend.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yareach.codesnaccbackend.dto.comment.CommentDto
+import com.yareach.codesnaccbackend.dto.comment.PostCommentDto
 import jakarta.transaction.Transactional
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -53,5 +59,55 @@ class PostCommentControllerTest {
         mockMvc.perform( get("/posts/100/comments") )
             .andExpect( status().isNotFound )
             .andReturn()
+    }
+
+    @Test
+    @DisplayName("댓글 올리기 성공")
+    @WithMockUser(username = "test-user1")
+    fun postComment() {
+        val postCommentDto = PostCommentDto(
+            content = "<NEWCOMMENT>"
+        )
+        mockMvc.perform(
+            post("/posts/0/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postCommentDto)))
+            .andExpect( status().isCreated )
+            .andExpect(header().exists("Location"))
+            .andExpect(header().string("Location", Matchers.startsWith("/comments/")))
+    }
+
+    @Test
+    @DisplayName("유저가 존재하지 않을 경우 댓글 올리기 실패")
+    @WithMockUser(username = "unknown-user")
+    fun tryPostCommentButUserNotFound() {
+        val postCommentDto = PostCommentDto(
+            content = "<NEWCOMMENT>"
+        )
+        mockMvc.perform(
+            post("/posts/0/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postCommentDto)))
+            .andExpect( status().isNotFound )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$.code").value("USER_NOT_FOUND") )
+            .andExpect( jsonPath("$.message").value("해당 아이디의 유저는 존재하지 않습니다: unknown-user") )
+    }
+    @Test
+    @DisplayName("게시글이 존재하지 않을 경우 댓글 올리기 실패")
+    @WithMockUser(username = "test-user1")
+    fun tryPostCommentButPostNotFound() {
+        val postCommentDto = PostCommentDto(
+            content = "<NEWCOMMENT>"
+        )
+        val postId = 100
+        mockMvc.perform(
+            post("/posts/${postId}/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postCommentDto)))
+            .andExpect( status().isNotFound )
+            .andExpect( jsonPath("$").isNotEmpty )
+            .andExpect( jsonPath("$.code").value("POST_NOT_FOUND") )
+            .andExpect( jsonPath("$.message").value("게시글이 존재하지 않습니다: $postId") )
     }
 }

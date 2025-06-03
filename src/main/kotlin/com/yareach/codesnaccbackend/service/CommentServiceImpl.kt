@@ -10,6 +10,7 @@ import com.yareach.codesnaccbackend.extensions.toDto
 import com.yareach.codesnaccbackend.repository.CommentRepository
 import com.yareach.codesnaccbackend.repository.PostRepository
 import com.yareach.codesnaccbackend.repository.UserRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,6 +30,7 @@ class CommentServiceImpl(
             .map { it.toDto() }
     }
 
+    @Transactional
     override fun postCommentByPostId(
         postId: Int,
         userId: String,
