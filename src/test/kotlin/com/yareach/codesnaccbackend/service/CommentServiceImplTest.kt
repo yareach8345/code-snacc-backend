@@ -162,4 +162,28 @@ class CommentServiceImplTest {
             commentService.deleteComment(mockCommentId, mockUserId)
         }
     }
+
+    @Test
+    @DisplayName("id로 댓글 가져오기")
+    fun getCommentById() {
+        val commentIdCapture = slot<Int>()
+        every { commentRepository.findByIdOrNull(capture(commentIdCapture)) } returns (mockCommentEntity)
+
+        val result = commentService.getComment(mockCommentId)
+
+        assertEquals(mockCommentId, result.commentId)
+        assertEquals(mockCommentEntity.content, result.content)
+        assertEquals(mockCommentEntity.writtenAt, result.writtenAt)
+        assertEquals(mockCommentEntity.writer.id, result.writerId)
+    }
+
+    @Test
+    @DisplayName("id로 댓글 가져오기 (해당 댓글의 id가 존재하지 않음)")
+    fun getCommentByIdButTheCommentIsNotExists() {
+        every { commentRepository.findByIdOrNull(any()) } returns null
+
+        assertThrows(CommentNotFoundException::class.java) {
+            commentService.getComment(mockCommentId)
+        }
+    }
 }

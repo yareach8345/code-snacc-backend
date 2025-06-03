@@ -59,4 +59,8 @@ class CommentServiceImpl(
 
         commentRepository.deleteById(commentId)
     }
+
+    override fun getComment(commentId: Int): CommentDto {
+        return commentRepository.findOrThrow(commentId) { throw CommentNotFoundException(commentId) }.toDto()
+    }
 }

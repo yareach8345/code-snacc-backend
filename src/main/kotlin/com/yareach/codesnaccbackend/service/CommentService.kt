@@ -9,4 +9,6 @@ interface CommentService {
     fun postCommentByPostId(postId: Int, userId: String, newCommentDto: PostCommentDto): Int
 
     fun deleteComment(commentId: Int, userId: String)
+
+    fun getComment(commentId: Int): CommentDto
 }

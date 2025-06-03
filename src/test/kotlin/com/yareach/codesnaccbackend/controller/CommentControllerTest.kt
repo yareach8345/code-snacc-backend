@@ -16,6 +16,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import kotlin.test.Test
 
@@ -91,5 +93,22 @@ class CommentControllerTest {
         mockMvc.perform( delete("/comments/-1") )
             .andExpect( status().isNotFound )
 
+    }
+
+    @Test
+    @DisplayName("댓글 id로 댓글 가져오기")
+    fun getCommentByCommentId() {
+        mockMvc.perform( get("/comments/1") )
+            .andExpect( status().isOk )
+            .andExpect( jsonPath("$.commentId").value(1) )
+            .andExpect( jsonPath("$.writerId").value("test-user1") )
+            .andExpect( jsonPath("$.content").value("<TEST COMMENT1>") )
+    }
+
+    @Test
+    @DisplayName("댓글 id로 댓글 가져오기(댓글이 존재하지 않아 실패)")
+    fun tryGetCommentByCommentIdButTheCommentIsNotExists() {
+        mockMvc.perform( get("/comments/-1") )
+            .andExpect( status().isNotFound )
     }
 }
