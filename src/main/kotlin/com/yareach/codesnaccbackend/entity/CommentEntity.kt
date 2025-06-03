@@ -16,7 +16,7 @@ class CommentEntity (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    var id: Int?,
+    var id: Int? = null,
 
     var content: String,
 

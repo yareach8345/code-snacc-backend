@@ -1,6 +1,5 @@
 package com.yareach.codesnaccbackend.controller
 
-import com.yareach.codesnaccbackend.dto.comment.CommentDto
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.post.PostSearchDto
 import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
@@ -11,7 +10,6 @@ import com.yareach.codesnaccbackend.exception.AccessDeniedException
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
 import com.yareach.codesnaccbackend.extensions.logger
-import com.yareach.codesnaccbackend.service.CommentService
 import com.yareach.codesnaccbackend.service.PostService
 import com.yareach.codesnaccbackend.util.getUserId
 import org.springframework.http.ResponseEntity
@@ -29,9 +27,8 @@ import java.net.URI
 
 @RestController
 @RequestMapping("/posts")
-class PostsController(
+class PostController(
     private val postService: PostService,
-    private val commentService: CommentService
 ) {
     val logger = logger()
 
@@ -110,10 +107,5 @@ class PostsController(
         val userId = getUserId(SecurityContextHolder.getContext().authentication)
         postService.deletePost(postId, userId)
         return ResponseEntity.ok().build()
-    }
-
-    @GetMapping("/{postId}/comments")
-    fun getComments(@PathVariable postId: Int): ResponseEntity<List<CommentDto>> {
-        return ResponseEntity.ok(commentService.getCommentsByPostId(postId))
     }
 }
