@@ -33,5 +33,7 @@ fun CommentEntity.toDto() =
         commentId = id ?: throw RequiredFieldIsNullException("id", "CommentEntity"),
         content = content,
         writerId = writer.id,
+        writerNickname = writer.nickname,
+        writerIcon = writer.icon,
         writtenAt = writtenAt ?: throw RequiredFieldIsNullException("writtenAt", "CommentEntity"),
     )
