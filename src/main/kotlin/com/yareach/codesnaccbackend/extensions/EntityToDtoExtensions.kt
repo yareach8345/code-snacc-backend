@@ -16,7 +16,9 @@ fun UserEntity.toCustomUserDetails() = CustomUserDetails(this)
 fun PostEntity.toDto(userId: String?) =
     PostInfoResponseDto(
         id = id ?: throw RequiredFieldIsNullException("id", "PostEntity"),
-        writer = writer.toUserInfoDto(),
+        writerId = writer.id,
+        writerNickname = writer.nickname,
+        writerIcon = writer.icon,
         title = title,
         code = code,
         language = language,

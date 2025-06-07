@@ -1,11 +1,12 @@
 package com.yareach.codesnaccbackend.dto.post
 
-import com.yareach.codesnaccbackend.dto.user.UserInfoDto
 import java.time.LocalDateTime
 
 data class PostInfoResponseDto(
     val id: Int,
-    val writer: UserInfoDto,
+    val writerId: String,
+    val writerNickname: String?,
+    val writerIcon: String?,
     val title: String,
     val code: String,
     val language: String,
