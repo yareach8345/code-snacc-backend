@@ -107,7 +107,7 @@ class CommentControllerTest {
         mockMvc.perform( get("/comments/1") )
             .andExpect( status().isOk )
             .andExpect( jsonPath("$.commentId").value(1) )
-            .andExpect( jsonPath("$.writerId").value("test-user1") )
+            .andExpect( jsonPath("$.writer.id").value("test-user1") )
             .andExpect( jsonPath("$.content").value("<TEST COMMENT1>") )
     }
 

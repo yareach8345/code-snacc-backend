@@ -214,7 +214,7 @@ class PostControllerTest {
         mockMvc.perform( get("/posts/2") )
             .andExpect( status().isOk )
             .andExpect( jsonPath("$").isNotEmpty )
-            .andExpect( jsonPath("$.writerId").value("test-user2") )
+            .andExpect( jsonPath("$.writer.id").value("test-user2") )
             .andReturn()
             .response
             .contentAsString

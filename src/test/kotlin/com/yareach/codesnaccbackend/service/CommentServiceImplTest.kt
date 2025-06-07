@@ -175,7 +175,7 @@ class CommentServiceImplTest {
         assertEquals(mockCommentId, result.commentId)
         assertEquals(mockCommentEntity.content, result.content)
         assertEquals(mockCommentEntity.writtenAt, result.writtenAt)
-        assertEquals(mockCommentEntity.writer.id, result.writerId)
+        assertEquals(mockCommentEntity.writer.id, result.writer.id)
     }
 
     @Test

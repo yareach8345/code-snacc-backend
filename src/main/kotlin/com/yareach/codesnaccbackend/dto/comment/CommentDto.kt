@@ -1,12 +1,11 @@
 package com.yareach.codesnaccbackend.dto.comment
 
+import com.yareach.codesnaccbackend.dto.user.WriterInfoDto
 import java.time.LocalDateTime
 
 data class CommentDto(
     val commentId: Int,
     val content: String,
-    val writerId: String,
-    val writerNickname: String?,
-    val writerIcon: String?,
+    val writer: WriterInfoDto,
     val writtenAt: LocalDateTime,
 )
