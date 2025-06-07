@@ -1,8 +1,10 @@
 package com.yareach.codesnaccbackend.extensions
 
 import com.yareach.codesnaccbackend.config.security.CustomUserDetails
+import com.yareach.codesnaccbackend.dto.comment.CommentDto
 import com.yareach.codesnaccbackend.dto.post.PostInfoResponseDto
 import com.yareach.codesnaccbackend.dto.user.UserInfoDto
+import com.yareach.codesnaccbackend.entity.CommentEntity
 import com.yareach.codesnaccbackend.entity.PostEntity
 import com.yareach.codesnaccbackend.entity.UserEntity
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
@@ -24,4 +26,14 @@ fun PostEntity.toDto(userId: String?) =
         commentCnt = comments.size,
         recommendCnt = getRecommendCount(),
         didIRecommend = userId in recommends.map { user -> user.id }
+    )
+
+fun CommentEntity.toDto() =
+    CommentDto(
+        commentId = id ?: throw RequiredFieldIsNullException("id", "CommentEntity"),
+        content = content,
+        writerId = writer.id,
+        writerNickname = writer.nickname,
+        writerIcon = writer.icon,
+        writtenAt = writtenAt ?: throw RequiredFieldIsNullException("writtenAt", "CommentEntity"),
     )

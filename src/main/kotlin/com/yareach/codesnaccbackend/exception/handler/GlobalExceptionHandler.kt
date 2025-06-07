@@ -2,6 +2,7 @@ package com.yareach.codesnaccbackend.exception.handler
 
 import com.yareach.codesnaccbackend.dto.ErrorResponse
 import com.yareach.codesnaccbackend.exception.AccessDeniedException
+import com.yareach.codesnaccbackend.exception.CommentNotFoundException
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
 import com.yareach.codesnaccbackend.exception.RequiredFieldIsNullException
@@ -102,5 +103,12 @@ class GlobalExceptionHandler {
     fun handleResourceOwnershipException(ex: ResourceOwnershipException): ErrorResponse = ErrorResponse(
         code = "RESOURCE_OWNERSHIP",
         message = ex.message ?: "해당 자원에 접근할 수 없습니다."
+    )
+
+    @ExceptionHandler(CommentNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleCommentNotFoundException(ex: CommentNotFoundException): ErrorResponse = ErrorResponse(
+        code = "COMMENT_NOT_FOUND",
+        message = ex.message ?: "해당 댓글이 존재하지 않습니다. ${ex.commentId}"
     )
 }

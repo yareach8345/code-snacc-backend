@@ -27,8 +27,8 @@ import java.net.URI
 
 @RestController
 @RequestMapping("/posts")
-class PostsController(
-    private val postService: PostService
+class PostController(
+    private val postService: PostService,
 ) {
     val logger = logger()
 
