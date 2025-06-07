@@ -71,8 +71,8 @@ class PostServiceImpl(
             .getNRandomPost(exclude ?: emptySet(), n)
             .map { it.toDto(userId) }
 
-    override fun uploadPost(postUploadDto: PostUploadDto): Int {
-        val userEntity = userRepository.findOrThrow(postUploadDto.writerId) { UserNotFoundException(postUploadDto.writerId) }
+    override fun uploadPost(postUploadDto: PostUploadDto, userId: String): Int {
+        val userEntity = userRepository.findOrThrow(userId) { UserNotFoundException(userId) }
         val tagEntities = tagRepository.findByTagIn(postUploadDto.tags)
         val postEntity = PostEntity (
             writer = userEntity,

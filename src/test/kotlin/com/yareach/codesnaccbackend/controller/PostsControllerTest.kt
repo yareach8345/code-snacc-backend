@@ -149,7 +149,6 @@ class PostsControllerTest {
     @WithMockUser(username = "test-user1")
     fun createPost() {
         val postDto = PostUploadDto(
-            writerId = "test-user1",
             title = "test-title",
             code = "test-code",
             language = "test-language",
@@ -173,7 +172,6 @@ class PostsControllerTest {
     @WithMockUser(username = "test-user1")
     fun deletePost() {
         val postDto = PostUploadDto(
-            writerId = "test-user1",
             title = "delete-test",
             code = "test-code",
             language = "test-language",
@@ -233,7 +231,6 @@ class PostsControllerTest {
     @WithMockUser(username = "test-user1")
     fun updatePost() {
         val postDto = PostUploadDto(
-            writerId = "test-user1",
             title = "delete-test",
             code = "test-code",
             language = "test-language",

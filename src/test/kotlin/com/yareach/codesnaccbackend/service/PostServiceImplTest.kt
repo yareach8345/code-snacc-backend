@@ -220,7 +220,6 @@ class PostServiceImplTest {
         }
 
         val postUploadDto = PostUploadDto(
-            writerId = "test-user1",
             title = "test-title",
             code = "test-code",
             language = "test-language",
@@ -228,7 +227,7 @@ class PostServiceImplTest {
             tags = listOf("test-tag1", "test-tag2")
         )
 
-        postService.uploadPost(postUploadDto)
+        postService.uploadPost(postUploadDto, "test-user1")
 
         assertEquals("test-user1", capturePost.captured.writer.id)
         assertEquals("test-title", capturePost.captured.title)

@@ -85,12 +85,10 @@ class PostsController(
 
     @PostMapping
     fun uploadPost(@RequestBody postUploadDto: PostUploadDto): ResponseEntity<PostUploadResponseDto> {
-        val userId = getUserId(SecurityContextHolder.getContext().authentication)
+        val userId = getUserId(SecurityContextHolder.getContext().authentication) ?: throw AccessDeniedException("로그인 이후에만 게시글을 업로드 할 수 있습니다.")
 
-        if(userId != postUploadDto.writerId) throw AccessDeniedException("작성자는 현재 로그인한 사용자여야 합니다.")
-
-        val savedPostId = postService.uploadPost(postUploadDto)
-        logger.info("post가 업로드 되었습니다. ${postUploadDto.title}($savedPostId) by ${postUploadDto.writerId}")
+        val savedPostId = postService.uploadPost(postUploadDto, userId)
+        logger.info("post가 업로드 되었습니다. ${postUploadDto.title}($savedPostId) by $userId")
 
         return ResponseEntity.created(URI.create("/posts/$savedPostId")).body(PostUploadResponseDto(savedPostId))
     }
