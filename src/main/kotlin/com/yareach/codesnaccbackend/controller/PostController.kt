@@ -6,6 +6,7 @@ import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadResponseDto
+import com.yareach.codesnaccbackend.dto.post.UpdateRecommendResponse
 import com.yareach.codesnaccbackend.exception.AccessDeniedException
 import com.yareach.codesnaccbackend.exception.InvalidPageNumberException
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
@@ -105,5 +106,19 @@ class PostController(
         val userId = getUserId(SecurityContextHolder.getContext().authentication)
         postService.deletePost(postId, userId)
         return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/{postId}/recommend")
+    fun updateRecommend(@PathVariable postId: Int): ResponseEntity<UpdateRecommendResponse> {
+        val userId = getUserId(SecurityContextHolder.getContext().authentication) ?: throw AccessDeniedException("로그인 이후에만 사용가능한 기능입니다.")
+        val result = postService.recommendPost(postId, userId)
+        return ResponseEntity.ok(result)
+    }
+
+    @DeleteMapping("/{postId}/recommend")
+    fun cancelRecommend(@PathVariable postId: Int): ResponseEntity<UpdateRecommendResponse> {
+        val userId = getUserId(SecurityContextHolder.getContext().authentication) ?: throw AccessDeniedException("로그인 이후에만 사용가능한 기능입니다.")
+        val result = postService.cancelRecommendPost(postId, userId)
+        return ResponseEntity.ok(result)
     }
 }
