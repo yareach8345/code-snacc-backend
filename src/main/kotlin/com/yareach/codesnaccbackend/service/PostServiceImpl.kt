@@ -5,17 +5,13 @@ import com.yareach.codesnaccbackend.dto.post.PostSearchDto
 import com.yareach.codesnaccbackend.dto.post.PostUpdateDto
 import com.yareach.codesnaccbackend.dto.post.SearchPostResultDto
 import com.yareach.codesnaccbackend.dto.post.PostUploadDto
-import com.yareach.codesnaccbackend.dto.post.UpdateRecommendResponse
 import com.yareach.codesnaccbackend.entity.PostEntity
-import com.yareach.codesnaccbackend.entity.RecommendEntity
-import com.yareach.codesnaccbackend.entity.RecommendEntityId
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
 import com.yareach.codesnaccbackend.exception.ResourceOwnershipException
 import com.yareach.codesnaccbackend.exception.UserNotFoundException
 import com.yareach.codesnaccbackend.extensions.findOrThrow
 import com.yareach.codesnaccbackend.extensions.toDto
 import com.yareach.codesnaccbackend.repository.PostRepository
-import com.yareach.codesnaccbackend.repository.RecommendRepository
 import com.yareach.codesnaccbackend.repository.TagRepository
 import com.yareach.codesnaccbackend.repository.UserRepository
 import jakarta.transaction.Transactional
@@ -29,7 +25,6 @@ class PostServiceImpl(
     val postRepository: PostRepository,
     val userRepository: UserRepository,
     val tagRepository: TagRepository,
-    val recommendRepository: RecommendRepository,
 ): PostService {
     override fun searchPosts(pageSize: Int, page: Int, userId: String?, searchDto: PostSearchDto?): SearchPostResultDto = SearchPostResultDto(
         posts = postRepository
@@ -122,39 +117,5 @@ class PostServiceImpl(
                 message = "유저 아이디 ${userId}와 $postId 게시글의 작성자 정보가 일치하지 않습니다."
             )
         }
-    }
-
-    override fun recommendPost(postId: Int, userId: String): UpdateRecommendResponse {
-        val recomment = RecommendEntity(
-            RecommendEntityId(
-                user = userRepository.findOrThrow(userId) { throw UserNotFoundException(userId) },
-                post = postRepository.findOrThrow(postId) { throw PostNotFoundException(postId) }
-            )
-        )
-        recommendRepository.save(recomment)
-
-        val recommendCnt = recommendRepository.countByPostId(postId)
-
-        return UpdateRecommendResponse(
-            didIRecommended = true,
-            recommendCnt
-        )
-    }
-
-    @Transactional
-    override fun cancelRecommendPost(postId: Int, userId: String): UpdateRecommendResponse {
-        val recommendId = RecommendEntityId(
-            user = userRepository.findOrThrow(userId) { throw UserNotFoundException(userId) },
-            post = postRepository.findOrThrow(postId) { throw PostNotFoundException(postId) }
-        )
-
-        recommendRepository.deleteById(recommendId)
-
-        val recommendCnt = recommendRepository.countByPostId(postId)
-
-        return UpdateRecommendResponse(
-            didIRecommended = false,
-            recommendCnt
-        )
     }
 }
