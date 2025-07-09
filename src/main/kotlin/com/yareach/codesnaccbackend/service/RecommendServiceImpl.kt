@@ -1,6 +1,6 @@
 package com.yareach.codesnaccbackend.service
 
-import com.yareach.codesnaccbackend.dto.post.UpdateRecommendResponse
+import com.yareach.codesnaccbackend.dto.recommend.UpdateRecommendResponse
 import com.yareach.codesnaccbackend.entity.RecommendEntity
 import com.yareach.codesnaccbackend.entity.RecommendEntityId
 import com.yareach.codesnaccbackend.exception.PostNotFoundException
@@ -18,6 +18,7 @@ class RecommendServiceImpl (
     val userRepository: UserRepository,
     val postRepository: PostRepository,
 ): RecommendService {
+    @Transactional
     override fun recommendPost(postId: Int, userId: String): UpdateRecommendResponse {
         val recomment = RecommendEntity(
             RecommendEntityId(
@@ -50,5 +51,9 @@ class RecommendServiceImpl (
             didIRecommended = false,
             recommendCnt
         )
+    }
+
+    override fun getRecommendCount(postId: Int): Long {
+        return recommendRepository.countByPostId(postId)
     }
 }
