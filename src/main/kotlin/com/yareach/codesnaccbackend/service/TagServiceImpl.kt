@@ -8,10 +8,19 @@ import org.springframework.stereotype.Service
 class TagServiceImpl(
     private val tagRepository: TagRepository
 ) : TagService {
+    val tags: MutableSet<String> = mutableSetOf()
+
     override fun getTags(): TagDto {
-        val tags = tagRepository.findAll()
         return TagDto(
-            tags = tags.map { it.tag }
+            tags = tags.toList()
         )
+    }
+
+    fun readTagsFromDB() {
+        tags.clear()
+        tagRepository
+            .findAll()
+            .map{it.tag}
+            .forEach { tags.add(it) }
     }
 }
