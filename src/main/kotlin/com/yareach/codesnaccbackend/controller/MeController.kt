@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/me")
+@RequestMapping("/users/me")
 class MeController (
     val userService: UserService
 ) {
@@ -34,7 +34,6 @@ class MeController (
 
     @PatchMapping("/quit")
     fun quit(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Unit> {
-        println("asdfasdfasdf")
         val id = SecurityContextHolder.getContext().authentication.name
         userService.quit(id)
         SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().authentication)

@@ -23,7 +23,7 @@ class SecurityConfig(
         http
             .authorizeHttpRequests { it
                 .requestMatchers("/logout").authenticated()
-                .requestMatchers("/me/**").authenticated()
+                .requestMatchers("/users/me/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/posts/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE , "/posts/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/posts/**").authenticated()
