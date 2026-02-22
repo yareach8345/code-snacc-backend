@@ -45,6 +45,7 @@ spring.jpa.hibernate.ddl-auto=validate
 | spring.datasource.username          | データベースのユーザーネーム    |
 | spring.datasource.password          | データベースのパスワード      |
 | spring.datasource.driver-class-name | データベースドライバー       |
+
 MySQL以外の他のデータベースを使った場合、上記のファイルにあるスクリプトの実行やリポジトリのメソッド利用時に問題が発生する恐れがあります。
 
 
